@@ -8,6 +8,7 @@ import { login, self } from "../../http/api";
 import { useToast } from "../../context/toast/hook";
 import type { ResponseError } from "../../types/error.type";
 import type { User } from "../../types/user.type";
+import { useAuthStore } from "../../store/auth.store";
 
 const loginUser = async ({ email, password }: LoginData) => {
   const { data } = await login({
@@ -27,7 +28,7 @@ const selfData = async () => {
 export default function LoginPage() {
   const toast = useToast();
   const navigate = useNavigate();
-
+  const { setUser } = useAuthStore();
   const { refetch } = useQuery<User>({
     queryKey: ["self"],
     queryFn: selfData,
@@ -45,7 +46,7 @@ export default function LoginPage() {
         });
         return;
       }
-
+      setUser(result.data);
       toast.success({
         content: "Login Successfull",
         onClose: () => {
