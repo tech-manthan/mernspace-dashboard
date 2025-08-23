@@ -45,6 +45,7 @@ export default function LoginPage() {
     mutationKey: ["logout"],
     mutationFn: logoutUser,
     onSuccess: async () => {
+      removeUser();
       toast.success({
         content: "Logged out successfully",
         onClose: () => {
@@ -76,7 +77,6 @@ export default function LoginPage() {
           content: "Customer not allowed to access Mernspace Dashboard",
         });
         mutateLogout();
-        removeUser();
         return;
       }
 
