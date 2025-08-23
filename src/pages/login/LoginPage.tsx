@@ -2,11 +2,12 @@ import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "../../components/icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { LoginData } from "../../types/auth.type";
-import { login } from "../../http/api";
+import { login, self } from "../../http/api";
 import { useToast } from "../../context/toast/hook";
 import type { ResponseError } from "../../types/error.type";
+import type { User } from "../../types/user.type";
 
 const loginUser = async ({ email, password }: LoginData) => {
   const { data } = await login({
@@ -17,13 +18,34 @@ const loginUser = async ({ email, password }: LoginData) => {
   return data;
 };
 
+const selfData = async () => {
+  const { data } = await self();
+
+  return data;
+};
+
 export default function LoginPage() {
   const toast = useToast();
   const navigate = useNavigate();
+
+  const { refetch } = useQuery<User>({
+    queryKey: ["self"],
+    queryFn: selfData,
+    enabled: false,
+  });
   const { mutate, isPending } = useMutation({
     mutationKey: ["login"],
     mutationFn: loginUser,
     onSuccess: async () => {
+      const result = await refetch();
+
+      if (result.status === "error" || !result.data) {
+        toast.error({
+          content: "Login Failed, Try again",
+        });
+        return;
+      }
+
       toast.success({
         content: "Login Successfull",
         onClose: () => {
