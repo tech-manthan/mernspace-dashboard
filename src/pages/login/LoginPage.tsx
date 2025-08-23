@@ -46,6 +46,14 @@ export default function LoginPage() {
         });
         return;
       }
+
+      if (result.data.role === "customer") {
+        toast.error({
+          content: "Customer not allowed to access Mernspace Dashboard",
+        });
+        return;
+      }
+
       setUser(result.data);
       toast.success({
         content: "Login Successfull",
