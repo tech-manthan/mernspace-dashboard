@@ -4,11 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "../../components/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { LoginData } from "../../types/auth.type";
-import { login, self } from "../../http/api";
+import { login, logout, self } from "../../http/api";
 import { useToast } from "../../context/toast/hook";
 import type { ResponseError } from "../../types/error.type";
 import type { User } from "../../types/user.type";
 import { useAuthStore } from "../../store/auth.store";
+import { usePermission } from "../../hooks/usePermission";
 
 const loginUser = async ({ email, password }: LoginData) => {
   const { data } = await login({
@@ -25,14 +26,37 @@ const selfData = async () => {
   return data;
 };
 
+const logoutUser = async () => {
+  const { data } = await logout();
+  return data;
+};
+
 export default function LoginPage() {
   const toast = useToast();
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { setUser, removeUser } = useAuthStore();
+  const { isAllowed } = usePermission();
   const { refetch } = useQuery<User>({
     queryKey: ["self"],
     queryFn: selfData,
     enabled: false,
+  });
+  const { mutate: mutateLogout } = useMutation({
+    mutationKey: ["logout"],
+    mutationFn: logoutUser,
+    onSuccess: async () => {
+      toast.success({
+        content: "Logged out successfully",
+        onClose: () => {
+          window.location.href = import.meta.env.VITE_CLIENT_UI_URL;
+        },
+      });
+    },
+    onError: async (err) => {
+      toast.error({
+        content: (err as ResponseError).response.data.errors[0].msg,
+      });
+    },
   });
   const { mutate, isPending } = useMutation({
     mutationKey: ["login"],
@@ -47,10 +71,12 @@ export default function LoginPage() {
         return;
       }
 
-      if (result.data.role === "customer") {
+      if (!isAllowed(result.data)) {
         toast.error({
           content: "Customer not allowed to access Mernspace Dashboard",
         });
+        mutateLogout();
+        removeUser();
         return;
       }
 
