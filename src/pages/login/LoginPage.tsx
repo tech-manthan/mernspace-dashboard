@@ -1,101 +1,11 @@
 import { LockFilled, LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Card, Checkbox, Flex, Form, Input, Layout, Space } from "antd";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Logo } from "../../components/icons";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import type { LoginData } from "../../types/auth.type";
-import { login, logout, self } from "../../http/api";
-import { useToast } from "../../context/toast/hook";
-import type { ResponseError } from "../../types/error.type";
-import type { User } from "../../types/user.type";
-import { useAuthStore } from "../../store/auth.store";
-import { usePermission } from "../../hooks/usePermission";
-
-const loginUser = async ({ email, password }: LoginData) => {
-  const { data } = await login({
-    email,
-    password,
-  });
-
-  return data;
-};
-
-const selfData = async () => {
-  const { data } = await self();
-
-  return data;
-};
-
-const logoutUser = async () => {
-  const { data } = await logout();
-  return data;
-};
+import { useLogin } from "../../hooks/api/useLogin";
 
 export default function LoginPage() {
-  const toast = useToast();
-  const navigate = useNavigate();
-  const { setUser, removeUser } = useAuthStore();
-  const { isAllowed } = usePermission();
-  const { refetch } = useQuery<User>({
-    queryKey: ["self"],
-    queryFn: selfData,
-    enabled: false,
-  });
-  const { mutate: mutateLogout } = useMutation({
-    mutationKey: ["logout"],
-    mutationFn: logoutUser,
-    onSuccess: async () => {
-      removeUser();
-      toast.success({
-        content: "Logged out successfully",
-        onClose: () => {
-          window.location.href = import.meta.env.VITE_CLIENT_UI_URL;
-        },
-      });
-    },
-    onError: async (err) => {
-      toast.error({
-        content: (err as ResponseError).response.data.errors[0].msg,
-      });
-    },
-  });
-  const { mutate, isPending } = useMutation({
-    mutationKey: ["login"],
-    mutationFn: loginUser,
-    onSuccess: async () => {
-      const result = await refetch();
-
-      if (result.status === "error" || !result.data) {
-        toast.error({
-          content: "Login Failed, Try again",
-        });
-        return;
-      }
-
-      if (!isAllowed(result.data)) {
-        toast.error({
-          content: "Customer not allowed to access Mernspace Dashboard",
-        });
-        mutateLogout();
-        return;
-      }
-
-      setUser(result.data);
-      toast.success({
-        content: "Login Successfull",
-        onClose: () => {
-          navigate("/", {
-            replace: true,
-          });
-        },
-      });
-    },
-    onError: async (err) => {
-      toast.error({
-        content: (err as ResponseError).response.data.errors[0].msg,
-      });
-    },
-  });
+  const { mutate, isPending } = useLogin();
   return (
     <Layout
       style={{

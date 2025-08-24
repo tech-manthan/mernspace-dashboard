@@ -1,4 +1,5 @@
 import Dashboard from "./dashboard/Dashboard";
-import NonAuth from "./NonAuth";
+import NonAuth from "./non-auth/NonAuth";
+import Root from "./root/Root";
 
-export { Dashboard, NonAuth };
+export { Dashboard, NonAuth, Root };
