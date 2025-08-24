@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import LoginPage from "./LoginPage";
 import { MemoryRouter } from "react-router-dom";
+import { ToastProvider } from "../../context/toast/ToastProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import LoginPage from "./LoginPage";
 
 describe("Login Page", () => {
   it("should render with required fields", () => {
+    const client = new QueryClient();
     render(
       <MemoryRouter>
-        <LoginPage />
+        <QueryClientProvider client={client}>
+          <ToastProvider>
+            <LoginPage />
+          </ToastProvider>
+        </QueryClientProvider>
       </MemoryRouter>
     );
     expect(screen.getByText("Sign in")).toBeInTheDocument();
