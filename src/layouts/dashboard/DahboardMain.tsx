@@ -139,7 +139,7 @@ const DashboardMain: React.FC = () => {
                 </Badge>
               </Link>
               <Dropdown placement="bottomRight" menu={{ items: dropDownItems }}>
-                <Space size={5}>
+                <Space size={5} style={{ cursor: "pointer" }}>
                   <Avatar
                     style={{
                       backgroundColor: "#fde3cf",
@@ -158,7 +158,7 @@ const DashboardMain: React.FC = () => {
             </Space>
           </Flex>
         </Header>
-        <Content style={{ margin: "0 16px" }}>
+        <Content style={{ margin: "20px 16px" }}>
           <Outlet />
         </Content>
         <Footer style={{ textAlign: "center" }}>
