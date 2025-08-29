@@ -19,7 +19,7 @@ const loginUser = async ({ email, password }: LoginData) => {
 
 export const useLogin = () => {
   const { refetch } = useSelf({ enabled: false });
-  const { mutate: mutateLogout } = useLogout();
+  const { mutate: mutateLogout } = useLogout(true);
   const { setUser } = useAuthStore();
   const toast = useToast();
   const { isAllowed } = usePermission();

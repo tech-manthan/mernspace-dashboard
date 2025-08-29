@@ -1,3 +1,4 @@
+import { LogoCircle } from "./LogoCircle";
 import { User } from "./User";
 import { Topping } from "./Topping";
 import { Gift } from "./Gift";
@@ -24,4 +25,5 @@ export {
   Gift,
   Topping,
   User,
+  LogoCircle,
 };

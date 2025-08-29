@@ -1,7 +1,21 @@
-import Icon from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
+import Icon, {
+  BellFilled,
+  DownOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
+import {
+  Avatar,
+  Badge,
+  Dropdown,
+  Flex,
+  Layout,
+  Menu,
+  Space,
+  theme,
+  type MenuProps,
+} from "antd";
 import { useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   Basket,
   Category,
@@ -9,8 +23,11 @@ import {
   Gift,
   Home,
   Logo,
+  LogoCircle,
   User,
 } from "../../components/icons";
+import { useAuthStore } from "../../store/auth.store";
+import { useLogout } from "../../hooks/api/useLogout";
 const { Sider, Content, Footer, Header } = Layout;
 
 const items = [
@@ -49,8 +66,17 @@ const items = [
 const DashboardMain: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const { pathname } = useLocation();
+  const { user } = useAuthStore();
+  const { mutate } = useLogout();
 
-  console.log(items.find((item) => item.key.includes(pathname)));
+  const dropDownItems: MenuProps["items"] = [
+    {
+      key: "logout",
+      label: "Logout",
+      icon: <LogoutOutlined />,
+      onClick: () => mutate(),
+    },
+  ];
 
   const {
     token: { colorBgContainer },
@@ -62,12 +88,11 @@ const DashboardMain: React.FC = () => {
         collapsible
         collapsed={collapsed}
         onCollapse={(value) => setCollapsed(value)}
-        style={{}}
         theme="light"
         breakpoint="md"
       >
         <Icon
-          component={Logo}
+          component={collapsed ? LogoCircle : Logo}
           style={{
             marginBlock: 20,
             marginInline: 30,
@@ -83,7 +108,54 @@ const DashboardMain: React.FC = () => {
         />
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Header style={{ padding: 20, background: colorBgContainer }}>
+          <Flex
+            justify="space-between"
+            align="center"
+            style={{
+              height: "100%",
+            }}
+          >
+            <Badge
+              count={
+                user?.role === "admin" ? "Admin User" : String(user?.tenant)
+              }
+              style={{
+                fontSize: 12,
+                fontWeight: "bold",
+              }}
+            />
+            <Space size={16} align="center">
+              <Link to={"/notifications"}>
+                <Badge size="small">
+                  <BellFilled
+                    size={20}
+                    style={{
+                      fontSize: 18,
+                    }}
+                  />
+                </Badge>
+              </Link>
+              <Dropdown placement="bottomRight" menu={{ items: dropDownItems }}>
+                <Space size={5}>
+                  <Avatar
+                    style={{
+                      backgroundColor: "#fde3cf",
+                      color: "#f65f42",
+                    }}
+                  >
+                    {user?.firstName[0]}
+                  </Avatar>
+                  <DownOutlined
+                    style={{
+                      fontSize: 10,
+                    }}
+                  />
+                </Space>
+              </Dropdown>
+            </Space>
+          </Flex>
+        </Header>
         <Content style={{ margin: "0 16px" }}>
           <Outlet />
         </Content>

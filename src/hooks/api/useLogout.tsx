@@ -9,7 +9,7 @@ const logoutUser = async () => {
   return data;
 };
 
-export const useLogout = () => {
+export const useLogout = (redirect: boolean = false) => {
   const { removeUser } = useAuthStore();
   const toast = useToast();
   return useMutation({
@@ -20,7 +20,9 @@ export const useLogout = () => {
       toast.success({
         content: "Logged out successfully",
         onClose: () => {
-          window.location.href = import.meta.env.VITE_CLIENT_UI_URL;
+          if (redirect) {
+            window.location.href = import.meta.env.VITE_CLIENT_UI_URL;
+          }
         },
       });
     },
