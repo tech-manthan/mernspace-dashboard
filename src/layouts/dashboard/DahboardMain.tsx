@@ -118,7 +118,9 @@ const DashboardMain: React.FC = () => {
           >
             <Badge
               count={
-                user?.role === "admin" ? "Admin User" : String(user?.tenant)
+                user?.role === "admin"
+                  ? "Admin User"
+                  : String(user?.tenant?.name)
               }
               style={{
                 fontSize: 12,
