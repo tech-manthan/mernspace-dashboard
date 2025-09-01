@@ -1,3 +1,4 @@
+import { BuisnessBag } from "./BuisnessBag";
 import { LogoCircle } from "./LogoCircle";
 import { User } from "./User";
 import { Topping } from "./Topping";
@@ -26,4 +27,5 @@ export {
   Topping,
   User,
   LogoCircle,
+  BuisnessBag,
 };

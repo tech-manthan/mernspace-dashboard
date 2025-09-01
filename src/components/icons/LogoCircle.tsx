@@ -7,7 +7,7 @@ export const LogoCircle = () => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="11" cy="11" r="7.5" stroke="#F65F42" stroke-width="7" />
+      <circle cx="11" cy="11" r="7.5" stroke="#F65F42" strokeWidth="7" />
     </svg>
   );
 };

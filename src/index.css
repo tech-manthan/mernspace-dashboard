@@ -1,0 +1,8 @@
+.sales-filter .ant-radio-button-wrapper::before {
+  content: none !important;
+}
+
+.sales-filter .ant-radio-button-wrapper::before,
+.sales-filter .ant-radio-button-wrapper {
+  border: 1px solid;
+}

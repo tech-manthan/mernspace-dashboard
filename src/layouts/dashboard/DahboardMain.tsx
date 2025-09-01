@@ -28,6 +28,7 @@ import {
 } from "../../components/icons";
 import { useAuthStore } from "../../store/auth.store";
 import { useLogout } from "../../hooks/api/useLogout";
+import { useResponsive } from "../../hooks/useResponsive";
 const { Sider, Content, Footer, Header } = Layout;
 
 const items = [
@@ -68,6 +69,7 @@ const DashboardMain: React.FC = () => {
   const { pathname } = useLocation();
   const { user } = useAuthStore();
   const { mutate } = useLogout();
+  const { isMobile } = useResponsive();
 
   const dropDownItems: MenuProps["items"] = [
     {
@@ -158,7 +160,7 @@ const DashboardMain: React.FC = () => {
             </Space>
           </Flex>
         </Header>
-        <Content style={{ margin: "20px 16px" }}>
+        <Content style={{ margin: isMobile ? "16px" : "24px" }}>
           <Outlet />
         </Content>
         <Footer style={{ textAlign: "center" }}>
