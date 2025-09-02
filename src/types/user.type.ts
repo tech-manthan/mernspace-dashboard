@@ -12,3 +12,10 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface GetUsers {
+  currentPage: number;
+  perPage: number;
+  total: number;
+  data: User[];
+}
