@@ -1,12 +1,13 @@
 import { RightOutlined } from "@ant-design/icons";
 import { Breadcrumb, Table } from "antd";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useGetUsers } from "../../hooks/api/useGetUsers";
 import type { User } from "../../types/user.type";
 import type { Tenant } from "../../types/tenant.type";
 import { useToast } from "../../hooks/useToast";
 import { useEffect } from "react";
 import type { ResponseError } from "../../types/error.type";
+import { useAuthStore } from "../../store/auth.store";
 
 const breadcrumb = [
   {
@@ -70,7 +71,10 @@ const tableColumns = [
 ];
 
 const UsersPage = () => {
-  const { data, isLoading, isError, error } = useGetUsers();
+  const { user } = useAuthStore();
+  const { data, isLoading, isError, error } = useGetUsers(
+    user?.role === "admin"
+  );
   const toast = useToast();
 
   useEffect(() => {
@@ -78,6 +82,10 @@ const UsersPage = () => {
       toast.error((error as ResponseError).response.data.errors[0].msg);
     }
   }, [error, isError, toast]);
+
+  if (user?.role !== "admin") {
+    return <Navigate to={"/"} replace={true} />;
+  }
 
   return (
     <>

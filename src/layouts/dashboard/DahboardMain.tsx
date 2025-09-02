@@ -29,40 +29,54 @@ import {
 import { useAuthStore } from "../../store/auth.store";
 import { useLogout } from "../../hooks/api/useLogout";
 import { useResponsive } from "../../hooks/useResponsive";
+import type { UserRole } from "../../types/user.type";
 const { Sider, Content, Footer, Header } = Layout;
 
-const items = [
-  {
-    key: "/",
-    icon: <Icon component={Home} />,
-    label: <NavLink to={"/"}>Home</NavLink>,
-  },
-  {
-    key: "/users",
-    icon: <Icon component={User} />,
-    label: <NavLink to={"/users"}>Users</NavLink>,
-  },
-  {
-    key: "/restaurants",
-    icon: <Icon component={Food} />,
-    label: <NavLink to={"/restaurants"}>Restaurants</NavLink>,
-  },
-  {
-    key: "/categories",
-    icon: <Icon component={Category} />,
-    label: <NavLink to={"/categories"}>Categories</NavLink>,
-  },
-  {
-    key: "/products",
-    icon: <Icon component={Basket} />,
-    label: <NavLink to={"/products"}>Products</NavLink>,
-  },
-  {
-    key: "/promos",
-    icon: <Icon component={Gift} />,
-    label: <NavLink to={"/promos"}>Promos</NavLink>,
-  },
-];
+const getMenuItems = (role: UserRole) => {
+  const baseItems = [
+    {
+      key: "/",
+      icon: <Icon component={Home} />,
+      label: <NavLink to={"/"}>Home</NavLink>,
+    },
+    {
+      key: "/categories",
+      icon: <Icon component={Category} />,
+      label: <NavLink to={"/categories"}>Categories</NavLink>,
+    },
+    {
+      key: "/products",
+      icon: <Icon component={Basket} />,
+      label: <NavLink to={"/products"}>Products</NavLink>,
+    },
+    {
+      key: "/promos",
+      icon: <Icon component={Gift} />,
+      label: <NavLink to={"/promos"}>Promos</NavLink>,
+    },
+  ];
+
+  if (role === "admin") {
+    const items = [...baseItems];
+    items.splice(
+      1,
+      0,
+      {
+        key: "/users",
+        icon: <Icon component={User} />,
+        label: <NavLink to={"/users"}>Users</NavLink>,
+      },
+      {
+        key: "/restaurants",
+        icon: <Icon component={Food} />,
+        label: <NavLink to={"/restaurants"}>Restaurants</NavLink>,
+      }
+    );
+    return items;
+  } else {
+    return baseItems;
+  }
+};
 
 const DashboardMain: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -84,6 +98,8 @@ const DashboardMain: React.FC = () => {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const menuItems = getMenuItems(user?.role as UserRole);
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -102,10 +118,10 @@ const DashboardMain: React.FC = () => {
         />
         <Menu
           mode="inline"
-          items={items}
+          items={menuItems}
           defaultSelectedKeys={["/"]}
           selectedKeys={[
-            items.find((item) => item.key.includes(pathname))?.key || "",
+            menuItems.find((item) => item.key.includes(pathname))?.key || "",
           ]}
         />
       </Sider>

@@ -7,9 +7,10 @@ const getUsersData = async () => {
   return data;
 };
 
-export const useGetUsers = () => {
+export const useGetUsers = (enabled: boolean = true) => {
   return useQuery<GetUsers>({
     queryKey: ["getUsers"],
     queryFn: getUsersData,
+    enabled,
   });
 };
