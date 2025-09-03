@@ -1,5 +1,5 @@
 import { RightOutlined } from "@ant-design/icons";
-import { Breadcrumb, Table } from "antd";
+import { Breadcrumb, Space, Table } from "antd";
 import { Link, Navigate } from "react-router-dom";
 import { useGetUsers } from "../../hooks/api/useGetUsers";
 import type { User } from "../../types/user.type";
@@ -8,6 +8,7 @@ import { useToast } from "../../hooks/useToast";
 import { useEffect } from "react";
 import type { ResponseError } from "../../types/error.type";
 import { useAuthStore } from "../../store/auth.store";
+import { UsersFilter } from "../../components/users/UsersFilter";
 
 const breadcrumb = [
   {
@@ -88,18 +89,26 @@ const UsersPage = () => {
   }
 
   return (
-    <>
+    <Space
+      direction="vertical"
+      style={{
+        width: "100%",
+      }}
+      size={"large"}
+    >
       <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
-      <Table
-        style={{
-          marginTop: 20,
+      <UsersFilter
+        onFilterChange={(filterName, filterValue) => {
+          console.log(filterName, filterValue);
         }}
+      />
+      <Table
         columns={tableColumns}
         dataSource={data?.data}
         loading={isLoading}
         rowKey={"id"}
       />
-    </>
+    </Space>
   );
 };
 
