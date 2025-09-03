@@ -5,3 +5,10 @@ export interface Tenant {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface GetTenants {
+  currentPage: number;
+  perPage: number;
+  total: number;
+  data: Tenant[];
+}

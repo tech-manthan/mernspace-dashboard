@@ -1,21 +1,19 @@
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Drawer, Space, Table } from "antd";
-import { Link, Navigate } from "react-router-dom";
-import { useGetUsers } from "../../hooks/api/useGetUsers";
-import type { User } from "../../types/user.type";
-import type { Tenant } from "../../types/tenant.type";
-import { useToast } from "../../hooks/useToast";
 import { useEffect, useState } from "react";
-import type { ResponseError } from "../../types/error.type";
+import { useToast } from "../../hooks/useToast";
 import { useAuthStore } from "../../store/auth.store";
-import { UsersFilter } from "../../components/users";
+import { useGetTenants } from "../../hooks/api/useGetTenants";
+import type { ResponseError } from "../../types/error.type";
+import { Link, Navigate } from "react-router-dom";
+import { Breadcrumb, Button, Drawer, Space, Table } from "antd";
+import { TenantsFilter } from "../../components/tenants";
+import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 
 const breadcrumb = [
   {
     title: <Link to={"/"}>Dashboard</Link>,
   },
   {
-    title: "Users",
+    title: "Restaurants",
   },
 ];
 
@@ -26,56 +24,29 @@ const tableColumns = [
     key: "id",
   },
   {
-    title: "Username",
-    dataIndex: "firstName",
-    key: "firstName",
-    render: (_text: string, record: User) => {
-      return (
-        <div key={record.id}>
-          {record.firstName} {record.lastName}
-        </div>
-      );
-    },
+    title: "Name",
+    dataIndex: "name",
+    key: "name",
   },
 
   {
-    title: "Email",
-    dataIndex: "email",
-    key: "email",
+    title: "Address",
+    dataIndex: "address",
+    key: "address",
   },
-  {
-    title: "Status",
-    dataIndex: "isBanned",
-    key: "isBanned",
-    render: (isBanned: boolean, record: User) => {
-      return <div key={record.id}>{isBanned ? "banned" : "active"}</div>;
-    },
-  },
-  {
-    title: "Role",
-    dataIndex: "role",
-    key: "role",
-  },
+
   {
     title: "Created At",
     dataIndex: "createdAt",
     key: "createdAt",
   },
-  {
-    title: "Tenant",
-    dataIndex: "tenant",
-    key: "tenant",
-    render: (tenant: Tenant | null, record: User) => {
-      return <div key={record.id}>{tenant ? tenant.name : "None"}</div>;
-    },
-  },
 ];
 
-const UsersPage = () => {
+const TenantsPage = () => {
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
-  const { data, isLoading, isError, error } = useGetUsers(
+  const { data, isLoading, isError, error } = useGetTenants(
     user?.role === "admin"
   );
 
@@ -103,7 +74,7 @@ const UsersPage = () => {
         size={"large"}
       >
         <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
-        <UsersFilter
+        <TenantsFilter
           onFilterChange={(filterName, filterValue) => {
             console.log(filterName, filterValue);
           }}
@@ -113,9 +84,9 @@ const UsersPage = () => {
             icon={<PlusOutlined />}
             onClick={() => setOpenDrawer(true)}
           >
-            Create User
+            Create Restaurant
           </Button>
-        </UsersFilter>
+        </TenantsFilter>
 
         <Table
           columns={tableColumns}
@@ -125,7 +96,7 @@ const UsersPage = () => {
         />
       </Space>
       <Drawer
-        title="Create User"
+        title="Create Restaurant"
         width={720}
         destroyOnHidden={true}
         onClose={() => {
@@ -143,4 +114,4 @@ const UsersPage = () => {
   );
 };
 
-export default UsersPage;
+export default TenantsPage;

@@ -26,10 +26,12 @@ export const useLogout = (redirect: boolean = false) => {
         },
       });
     },
-    onError: async (err) => {
-      toast.error({
-        content: (err as ResponseError).response.data.errors[0].msg,
-      });
+    onError: async (error) => {
+      toast.error(
+        (error as ResponseError).response.data.errors
+          ? (error as ResponseError).response.data.errors[0].msg
+          : error.message
+      );
     },
   });
 };
