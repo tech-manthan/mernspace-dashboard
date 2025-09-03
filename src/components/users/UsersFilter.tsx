@@ -1,6 +1,6 @@
-import { Button, Card, Col, Input, Row, Select } from "antd";
+import { Card, Col, Input, Row, Select } from "antd";
 import type { UserRole } from "../../types/user.type";
-import { PlusOutlined } from "@ant-design/icons";
+import type { ReactNode } from "react";
 
 const selectRolesOptions: Array<{ value: UserRole; label: string }> = [
   {
@@ -36,9 +36,10 @@ type UserFilterProps = {
     filterName: string,
     filterValue: string | UserRole | boolean
   ) => void;
+  children?: ReactNode;
 };
 
-export const UsersFilter = ({ onFilterChange }: UserFilterProps) => {
+export const UsersFilter = ({ onFilterChange, children }: UserFilterProps) => {
   return (
     <Card>
       <Row justify={"space-between"}>
@@ -79,11 +80,7 @@ export const UsersFilter = ({ onFilterChange }: UserFilterProps) => {
             </Col>
           </Row>
         </Col>
-        <Col>
-          <Button type="primary" icon={<PlusOutlined />}>
-            Create User
-          </Button>
-        </Col>
+        <Col>{children}</Col>
       </Row>
     </Card>
   );

@@ -1,11 +1,11 @@
-import { RightOutlined } from "@ant-design/icons";
-import { Breadcrumb, Space, Table } from "antd";
+import { PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { Breadcrumb, Button, Drawer, Space, Table } from "antd";
 import { Link, Navigate } from "react-router-dom";
 import { useGetUsers } from "../../hooks/api/useGetUsers";
 import type { User } from "../../types/user.type";
 import type { Tenant } from "../../types/tenant.type";
 import { useToast } from "../../hooks/useToast";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ResponseError } from "../../types/error.type";
 import { useAuthStore } from "../../store/auth.store";
 import { UsersFilter } from "../../components/users/UsersFilter";
@@ -73,10 +73,11 @@ const tableColumns = [
 
 const UsersPage = () => {
   const { user } = useAuthStore();
+  const toast = useToast();
+  const [openDrawer, setOpenDrawer] = useState(false);
   const { data, isLoading, isError, error } = useGetUsers(
     user?.role === "admin"
   );
-  const toast = useToast();
 
   useEffect(() => {
     if (isError) {
@@ -89,26 +90,52 @@ const UsersPage = () => {
   }
 
   return (
-    <Space
-      direction="vertical"
-      style={{
-        width: "100%",
-      }}
-      size={"large"}
-    >
-      <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
-      <UsersFilter
-        onFilterChange={(filterName, filterValue) => {
-          console.log(filterName, filterValue);
+    <>
+      <Space
+        direction="vertical"
+        style={{
+          width: "100%",
         }}
-      />
-      <Table
-        columns={tableColumns}
-        dataSource={data?.data}
-        loading={isLoading}
-        rowKey={"id"}
-      />
-    </Space>
+        size={"large"}
+      >
+        <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
+        <UsersFilter
+          onFilterChange={(filterName, filterValue) => {
+            console.log(filterName, filterValue);
+          }}
+        >
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setOpenDrawer(true)}
+          >
+            Create User
+          </Button>
+        </UsersFilter>
+
+        <Table
+          columns={tableColumns}
+          dataSource={data?.data}
+          loading={isLoading}
+          rowKey={"id"}
+        />
+      </Space>
+      <Drawer
+        title="Create User"
+        width={720}
+        destroyOnHidden={true}
+        onClose={() => {
+          setOpenDrawer(false);
+        }}
+        open={openDrawer}
+        extra={
+          <Space>
+            <Button onClick={() => setOpenDrawer(false)}>Cancel</Button>
+            <Button type="primary">Submit</Button>
+          </Space>
+        }
+      ></Drawer>
+    </>
   );
 };
 
