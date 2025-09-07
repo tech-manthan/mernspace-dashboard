@@ -1,6 +1,6 @@
 export const Error = () => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width={"350"}>
       <g id="freepik--background-complete--inject-150">
         <path
           fill="none"

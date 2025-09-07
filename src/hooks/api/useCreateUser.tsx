@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createUser } from "../../http/api";
 import type { ResponseError } from "../../types/error.type";
 import { useToast } from "../useToast";
 import type { CreateUserData } from "../../types/user.type";
-import { useGetUsers } from "./useGetUsers";
+// import { useGetUsers } from "./useGetUsers";
 
 const createUserFn = async (userData: CreateUserData) => {
   const { data } = await createUser(userData);
@@ -12,7 +12,8 @@ const createUserFn = async (userData: CreateUserData) => {
 
 export const useCreateUser = () => {
   const toast = useToast();
-  const { refetch } = useGetUsers(false);
+  // const { refetch } = useGetUsers(false);
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["createUser"],
@@ -21,7 +22,10 @@ export const useCreateUser = () => {
       toast.success({
         content: "User Created Successfully",
       });
-      await refetch();
+      // await refetch();
+      await queryClient.invalidateQueries({
+        queryKey: ["getUsers"],
+      });
     },
     onError: async (error) => {
       toast.error(
