@@ -12,3 +12,8 @@ export interface GetTenants {
   total: number;
   data: Tenant[];
 }
+
+export interface CreateTenantData {
+  name: string;
+  address: string;
+}
