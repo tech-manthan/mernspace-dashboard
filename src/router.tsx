@@ -7,11 +7,13 @@ import {
   TenantsPage,
 } from "./pages";
 import { Dashboard, NonAuth, Root } from "./layouts";
+import ErrorElement from "./components/common/ErrorElement";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Root />,
+    errorElement: <ErrorElement />,
     children: [
       {
         path: "",
@@ -32,7 +34,7 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "/auth",
+        path: "auth",
         element: <NonAuth />,
         children: [
           {

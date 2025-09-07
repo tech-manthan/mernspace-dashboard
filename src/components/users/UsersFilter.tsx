@@ -1,35 +1,7 @@
 import { Card, Col, Input, Row, Select } from "antd";
 import type { UserRole } from "../../types/user.type";
 import type { ReactNode } from "react";
-
-const selectRolesOptions: Array<{ value: UserRole; label: string }> = [
-  {
-    value: "customer",
-    label: "Customer",
-  },
-  {
-    value: "manager",
-    label: "Manager",
-  },
-  {
-    value: "admin",
-    label: "Admin",
-  },
-];
-
-const selectStatusOptions: Array<{
-  value: boolean;
-  label: string;
-}> = [
-  {
-    value: true,
-    label: "Banned",
-  },
-  {
-    value: false,
-    label: "Active",
-  },
-];
+import { selectRolesOptions, selectStatusOptions } from "./data";
 
 type UserFilterProps = {
   onFilterChange: (

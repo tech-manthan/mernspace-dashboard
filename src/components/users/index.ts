@@ -1,3 +1,4 @@
+import { UserForm } from "./forms/UserForm";
 import { UsersFilter } from "./UsersFilter";
 
-export { UsersFilter };
+export { UsersFilter, UserForm };

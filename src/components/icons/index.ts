@@ -1,3 +1,4 @@
+import { Error } from "./Error";
 import { BuisnessBag } from "./BuisnessBag";
 import { LogoCircle } from "./LogoCircle";
 import { User } from "./User";
@@ -28,4 +29,5 @@ export {
   User,
   LogoCircle,
   BuisnessBag,
+  Error,
 };

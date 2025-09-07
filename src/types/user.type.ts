@@ -8,6 +8,7 @@ export interface User {
   lastName: string;
   email: string;
   role: UserRole;
+  isBanned: boolean;
   tenant: Tenant | null;
   createdAt: Date;
   updatedAt: Date;
@@ -18,4 +19,16 @@ export interface GetUsers {
   perPage: number;
   total: number;
   data: User[];
+}
+
+export interface CreateUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  isBanned: boolean;
+  tenant: Tenant | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
