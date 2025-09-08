@@ -1,54 +1,46 @@
-import { Card, Col, Input, Row, Select } from "antd";
+import { Card, Col, Form, Input, Row, Select } from "antd";
 import type { UserRole } from "../../types/user.type";
 import type { ReactNode } from "react";
 import { selectRolesOptions, selectStatusOptions } from "./data";
 
 type UserFilterProps = {
-  onFilterChange: (
-    filterName: string,
-    filterValue: string | UserRole | boolean
-  ) => void;
   children?: ReactNode;
 };
 
-export const UsersFilter = ({ onFilterChange, children }: UserFilterProps) => {
+export const UsersFilter = ({ children }: UserFilterProps) => {
   return (
     <Card>
       <Row justify={"space-between"}>
         <Col span={16}>
           <Row gutter={20}>
             <Col span={12}>
-              <Input.Search
-                placeholder="Search"
-                allowClear
-                onChange={(e) => {
-                  onFilterChange("searchFilter", e.target.value);
-                }}
-              />
+              <Form.Item name={"q"}>
+                <Input.Search placeholder="Search" allowClear />
+              </Form.Item>
             </Col>
             <Col span={6}>
-              <Select<UserRole>
-                options={selectRolesOptions}
-                placeholder={"Role"}
-                allowClear
-                style={{
-                  width: "100%",
-                }}
-                onChange={(role) => onFilterChange("roleFilter", role)}
-              />
+              <Form.Item name={"role"}>
+                <Select<UserRole>
+                  options={selectRolesOptions}
+                  placeholder={"Role"}
+                  allowClear
+                  style={{
+                    width: "100%",
+                  }}
+                />
+              </Form.Item>
             </Col>
             <Col span={6}>
-              <Select
-                options={selectStatusOptions}
-                placeholder={"Status"}
-                allowClear
-                style={{
-                  width: "100%",
-                }}
-                onChange={(value: boolean) =>
-                  onFilterChange("statusFilter", value)
-                }
-              />
+              <Form.Item name={"isBanned"}>
+                <Select
+                  options={selectStatusOptions}
+                  placeholder={"Status"}
+                  allowClear
+                  style={{
+                    width: "100%",
+                  }}
+                />
+              </Form.Item>
             </Col>
           </Row>
         </Col>

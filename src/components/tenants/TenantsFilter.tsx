@@ -1,28 +1,20 @@
-import { Card, Col, Input, Row } from "antd";
+import { Card, Col, Form, Input, Row } from "antd";
 import type { ReactNode } from "react";
 
 type TenantsFilterProps = {
-  onFilterChange: (filterName: string, filterValue: string) => void;
   children?: ReactNode;
 };
 
-export const TenantsFilter = ({
-  onFilterChange,
-  children,
-}: TenantsFilterProps) => {
+export const TenantsFilter = ({ children }: TenantsFilterProps) => {
   return (
     <Card>
       <Row justify={"space-between"}>
         <Col span={16}>
           <Row gutter={20}>
             <Col span={12}>
-              <Input.Search
-                placeholder="Search"
-                allowClear
-                onChange={(e) => {
-                  onFilterChange("searchFilter", e.target.value);
-                }}
-              />
+              <Form.Item name={"q"}>
+                <Input.Search placeholder="Search" allowClear />
+              </Form.Item>
             </Col>
           </Row>
         </Col>

@@ -19,12 +19,14 @@ import { useGetUsers } from "../../hooks/api/useGetUsers";
 import type { User, UsersQueryParams } from "../../types/user.type";
 import type { Tenant } from "../../types/tenant.type";
 import { useToast } from "../../hooks/useToast";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ResponseError } from "../../types/error.type";
 import { useAuthStore } from "../../store/auth.store";
 import { UserForm, UsersFilter } from "../../components/users";
 import { useCreateUser } from "../../hooks/api/useCreateUser";
 import { PER_PAGE } from "../../constants";
+import type { FieldData } from "../../types/common.type";
+import { debounce } from "lodash";
 
 const breadcrumb = [
   {
@@ -89,6 +91,8 @@ const tableColumns = [
 
 const UsersPage = () => {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
+
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -96,6 +100,9 @@ const UsersPage = () => {
   const [queryParams, setQueryParams] = useState<UsersQueryParams>({
     perPage: PER_PAGE,
     currentPage: 1,
+    q: "",
+    role: undefined,
+    isBanned: undefined,
   });
   const { data, isFetching, isLoading, isError, error } = useGetUsers(
     user?.role === "admin",
@@ -112,6 +119,36 @@ const UsersPage = () => {
     form.resetFields();
     setOpenDrawer(false);
   };
+
+  const debouncedQUpdate = useMemo(
+    () =>
+      debounce((value: string) => {
+        setQueryParams((prev) => ({ ...prev, q: value }));
+      }, 500),
+    []
+  );
+
+  const onFilterChange = async (changedFields: FieldData[]) => {
+    const changedFilterFields = changedFields
+      .map((item) => {
+        return {
+          [item.name[0]]: item.value,
+        };
+      })
+      .reduce((acc, item) => ({ ...acc, ...item }), {});
+
+    if ("q" in changedFilterFields) {
+      debouncedQUpdate(changedFilterFields["q"] as string);
+    } else {
+      setQueryParams((prev) => ({ ...prev, ...changedFilterFields }));
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      debouncedQUpdate.cancel();
+    };
+  }, [debouncedQUpdate]);
 
   useEffect(() => {
     if (isError) {
@@ -142,19 +179,17 @@ const UsersPage = () => {
             <Spin indicator={<LoadingOutlined />} />
           )}
         </Flex>
-        <UsersFilter
-          onFilterChange={(filterName, filterValue) => {
-            console.log(filterName, filterValue);
-          }}
-        >
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setOpenDrawer(true)}
-          >
-            Create User
-          </Button>
-        </UsersFilter>
+        <Form form={filterForm} onFieldsChange={onFilterChange}>
+          <UsersFilter>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setOpenDrawer(true)}
+            >
+              Create User
+            </Button>
+          </UsersFilter>
+        </Form>
 
         <Table
           columns={tableColumns}

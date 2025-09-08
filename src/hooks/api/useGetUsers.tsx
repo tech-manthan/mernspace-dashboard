@@ -13,10 +13,16 @@ export const useGetUsers = (
   queryParams: UsersQueryParams = {
     currentPage: 1,
     perPage: PER_PAGE,
+    q: "",
+    isBanned: undefined,
+    role: undefined,
   }
 ) => {
+  const filteredParams = Object.fromEntries(
+    Object.entries(queryParams).filter((item) => !!item[1])
+  );
   const queryString = new URLSearchParams(
-    queryParams as unknown as Record<string, string>
+    filteredParams as unknown as Record<string, string>
   ).toString();
   return useQuery<GetUsers>({
     queryKey: ["getUsers", queryParams],

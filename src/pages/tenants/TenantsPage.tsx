@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "../../hooks/useToast";
 import { useAuthStore } from "../../store/auth.store";
 import { useGetTenants } from "../../hooks/api/useGetTenants";
@@ -20,6 +20,8 @@ import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { useCreateTenant } from "../../hooks/api/useCreateTenant";
 import { PER_PAGE } from "../../constants";
 import type { TenantsQueryParams } from "../../types/tenant.type";
+import type { FieldData } from "../../types/common.type";
+import { debounce } from "lodash";
 
 const breadcrumb = [
   {
@@ -57,12 +59,14 @@ const tableColumns = [
 
 const TenantsPage = () => {
   const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [queryParams, setQueryParams] = useState<TenantsQueryParams>({
     perPage: PER_PAGE,
     currentPage: 1,
+    q: "",
   });
   const { data, isLoading, isError, isFetching, error } = useGetTenants(
     user?.role === "admin",
@@ -79,6 +83,35 @@ const TenantsPage = () => {
     form.resetFields();
     setOpenDrawer(false);
   };
+
+  const debouncedQUpdate = useMemo(
+    () =>
+      debounce((value: string) => {
+        setQueryParams((prev) => ({ ...prev, q: value }));
+      }, 500),
+    []
+  );
+
+  const onFilterChange = (changedFields: FieldData[]) => {
+    const changedFilterFields = changedFields
+      .map((item) => {
+        return {
+          [item.name[0]]: item.value,
+        };
+      })
+      .reduce((acc, item) => ({ ...acc, ...item }), {});
+    if ("q" in changedFilterFields) {
+      debouncedQUpdate(changedFilterFields["q"] as string);
+    } else {
+      setQueryParams((prev) => ({ ...prev, ...changedFilterFields }));
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      debouncedQUpdate.cancel();
+    };
+  }, [debouncedQUpdate]);
 
   useEffect(() => {
     if (isError) {
@@ -107,19 +140,17 @@ const TenantsPage = () => {
           <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
           {(isFetching || isLoading) && <Spin />}
         </Flex>
-        <TenantsFilter
-          onFilterChange={(filterName, filterValue) => {
-            console.log(filterName, filterValue);
-          }}
-        >
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setOpenDrawer(true)}
-          >
-            Create Restaurant
-          </Button>
-        </TenantsFilter>
+        <Form form={filterForm} onFieldsChange={onFilterChange}>
+          <TenantsFilter>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setOpenDrawer(true)}
+            >
+              Create Restaurant
+            </Button>
+          </TenantsFilter>
+        </Form>
 
         <Table
           columns={tableColumns}

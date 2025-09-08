@@ -21,4 +21,5 @@ export interface CreateTenantData {
 export interface TenantsQueryParams {
   perPage: number;
   currentPage: number;
+  q: string;
 }

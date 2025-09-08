@@ -36,4 +36,7 @@ export interface CreateUserData {
 export interface UsersQueryParams {
   perPage: number;
   currentPage: number;
+  q: string;
+  role?: UserRole | undefined;
+  isBanned?: boolean | undefined;
 }

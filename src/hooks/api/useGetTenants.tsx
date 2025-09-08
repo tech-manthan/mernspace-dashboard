@@ -13,10 +13,14 @@ export const useGetTenants = (
   queryParams: TenantsQueryParams = {
     currentPage: 1,
     perPage: PER_PAGE,
+    q: "",
   }
 ) => {
+  const filteredParams = Object.fromEntries(
+    Object.entries(queryParams).filter((item) => !!item[1])
+  );
   const queryString = new URLSearchParams(
-    queryParams as unknown as Record<string, string>
+    filteredParams as unknown as Record<string, string>
   ).toString();
   return useQuery<GetTenants>({
     queryKey: ["getTenants", queryParams],
