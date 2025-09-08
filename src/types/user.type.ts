@@ -32,3 +32,8 @@ export interface CreateUserData {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface UsersQueryParams {
+  perPage: number;
+  currentPage: number;
+}

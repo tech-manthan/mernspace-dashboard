@@ -17,3 +17,8 @@ export interface CreateTenantData {
   name: string;
   address: string;
 }
+
+export interface TenantsQueryParams {
+  perPage: number;
+  currentPage: number;
+}

@@ -1,8 +1,22 @@
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, Drawer, Form, Space, Table, theme } from "antd";
+import {
+  LoadingOutlined,
+  PlusOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
+import {
+  Breadcrumb,
+  Button,
+  Drawer,
+  Flex,
+  Form,
+  Space,
+  Spin,
+  Table,
+  theme,
+} from "antd";
 import { Link, Navigate } from "react-router-dom";
 import { useGetUsers } from "../../hooks/api/useGetUsers";
-import type { User } from "../../types/user.type";
+import type { User, UsersQueryParams } from "../../types/user.type";
 import type { Tenant } from "../../types/tenant.type";
 import { useToast } from "../../hooks/useToast";
 import { useEffect, useState } from "react";
@@ -10,6 +24,7 @@ import type { ResponseError } from "../../types/error.type";
 import { useAuthStore } from "../../store/auth.store";
 import { UserForm, UsersFilter } from "../../components/users";
 import { useCreateUser } from "../../hooks/api/useCreateUser";
+import { PER_PAGE } from "../../constants";
 
 const breadcrumb = [
   {
@@ -77,13 +92,18 @@ const UsersPage = () => {
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
-  const { data, isLoading, isError, error } = useGetUsers(
-    user?.role === "admin"
+
+  const [queryParams, setQueryParams] = useState<UsersQueryParams>({
+    perPage: PER_PAGE,
+    currentPage: 1,
+  });
+  const { data, isFetching, isLoading, isError, error } = useGetUsers(
+    user?.role === "admin",
+    queryParams
   );
   const {
     token: { colorBgLayout },
   } = theme.useToken();
-
   const { mutate } = useCreateUser();
 
   const onHandleSubmit = async () => {
@@ -116,7 +136,12 @@ const UsersPage = () => {
         }}
         size={"large"}
       >
-        <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
+        <Flex justify="space-between">
+          <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
+          {(isFetching || isLoading) && (
+            <Spin indicator={<LoadingOutlined />} />
+          )}
+        </Flex>
         <UsersFilter
           onFilterChange={(filterName, filterValue) => {
             console.log(filterName, filterValue);
@@ -136,6 +161,19 @@ const UsersPage = () => {
           dataSource={data?.data}
           loading={isLoading}
           rowKey={"id"}
+          pagination={{
+            total: data?.total,
+            pageSize: queryParams.perPage,
+            current: queryParams.currentPage,
+            onChange: (page) => {
+              setQueryParams((prev) => {
+                return {
+                  ...prev,
+                  currentPage: page,
+                };
+              });
+            },
+          }}
         />
       </Space>
       <Drawer

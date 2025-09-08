@@ -4,10 +4,22 @@ import { useAuthStore } from "../../store/auth.store";
 import { useGetTenants } from "../../hooks/api/useGetTenants";
 import type { ResponseError } from "../../types/error.type";
 import { Link, Navigate } from "react-router-dom";
-import { Breadcrumb, Button, Drawer, Form, Space, Table, theme } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Drawer,
+  Flex,
+  Form,
+  Space,
+  Spin,
+  Table,
+  theme,
+} from "antd";
 import { TenantForm, TenantsFilter } from "../../components/tenants";
 import { PlusOutlined, RightOutlined } from "@ant-design/icons";
 import { useCreateTenant } from "../../hooks/api/useCreateTenant";
+import { PER_PAGE } from "../../constants";
+import type { TenantsQueryParams } from "../../types/tenant.type";
 
 const breadcrumb = [
   {
@@ -48,8 +60,13 @@ const TenantsPage = () => {
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
-  const { data, isLoading, isError, error } = useGetTenants(
-    user?.role === "admin"
+  const [queryParams, setQueryParams] = useState<TenantsQueryParams>({
+    perPage: PER_PAGE,
+    currentPage: 1,
+  });
+  const { data, isLoading, isError, isFetching, error } = useGetTenants(
+    user?.role === "admin",
+    queryParams
   );
   const {
     token: { colorBgLayout },
@@ -86,7 +103,10 @@ const TenantsPage = () => {
         }}
         size={"large"}
       >
-        <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
+        <Flex justify="space-between">
+          <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
+          {(isFetching || isLoading) && <Spin />}
+        </Flex>
         <TenantsFilter
           onFilterChange={(filterName, filterValue) => {
             console.log(filterName, filterValue);
@@ -106,6 +126,20 @@ const TenantsPage = () => {
           dataSource={data?.data}
           loading={isLoading}
           rowKey={"id"}
+          pagination={{
+            total: data?.total,
+            pageSize: queryParams.perPage,
+            current: queryParams.currentPage,
+            onChange: (page) => {
+              console.log(page);
+              setQueryParams((prev) => {
+                return {
+                  ...prev,
+                  currentPage: page,
+                };
+              });
+            },
+          }}
         />
       </Space>
       <Drawer

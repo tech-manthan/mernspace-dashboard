@@ -1,16 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import type { GetUsers } from "../../types/user.type";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { GetUsers, UsersQueryParams } from "../../types/user.type";
 import { getUsers } from "../../http/api";
+import { PER_PAGE } from "../../constants";
 
-const getUsersData = async () => {
-  const { data } = await getUsers();
+const getUsersData = async (queryString: string) => {
+  const { data } = await getUsers(queryString);
   return data;
 };
 
-export const useGetUsers = (enabled: boolean = true) => {
+export const useGetUsers = (
+  enabled: boolean = true,
+  queryParams: UsersQueryParams = {
+    currentPage: 1,
+    perPage: PER_PAGE,
+  }
+) => {
+  const queryString = new URLSearchParams(
+    queryParams as unknown as Record<string, string>
+  ).toString();
   return useQuery<GetUsers>({
-    queryKey: ["getUsers"],
-    queryFn: getUsersData,
+    queryKey: ["getUsers", queryParams],
+    queryFn: getUsersData.bind(this, queryString),
     enabled,
+    placeholderData: keepPreviousData,
   });
 };
