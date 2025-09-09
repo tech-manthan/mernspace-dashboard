@@ -1,12 +1,42 @@
-import { Card, Col, Form, Input, Row, Select, Space, Switch } from "antd";
+import {
+  Card,
+  Col,
+  Form,
+  Input,
+  Row,
+  Select,
+  Space,
+  Switch,
+  Typography,
+} from "antd";
 import type { UserRole } from "../../../types/user.type";
 import { selectRolesOptions } from "../data";
-import { useState } from "react";
-import { useGetTenants } from "../../../hooks/api/useGetTenants";
+import { useMemo, useState } from "react";
+import { useGetInfiniteTenants } from "../../../hooks/api/useGetInfiniteTenants";
+import { debounce } from "lodash";
+import type { Tenant } from "../../../types/tenant.type";
 
-export const UserForm = () => {
-  const [role, setRole] = useState<UserRole | undefined>();
-  const { data } = useGetTenants(role === "manager");
+interface UserFormProps {
+  tenant?: Tenant | null;
+  isEditing?: boolean;
+}
+
+export const UserForm = ({ tenant, isEditing = false }: UserFormProps) => {
+  const form = Form.useFormInstance();
+  const role = Form.useWatch<UserRole | undefined>("role", form);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const changedTenantId = Form.useWatch<number | undefined>("tenantId", form);
+
+  const [search, setSearch] = useState("");
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useGetInfiniteTenants(role === "manager", search);
+
+  const onSearch = useMemo(
+    () => debounce((val: string) => setSearch(val), 500),
+    []
+  );
+
   return (
     <Row>
       <Col span={24}>
@@ -75,26 +105,36 @@ export const UserForm = () => {
 
           <Card title="Security Info">
             <Row gutter={20}>
-              <Col span={12}>
-                <Form.Item
-                  label="Password"
-                  name={"password"}
-                  rules={[
-                    {
-                      required: true,
-                      message: "Password is required",
-                    },
-                    {
-                      pattern:
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
-                      message:
-                        "Password must be 8-20 characters and include uppercase, lowercase, number, and special character",
-                    },
-                  ]}
-                >
-                  <Input.Password size={"large"} placeholder="*******" />
-                </Form.Item>
-              </Col>
+              {isEditing && (
+                <Col span={12}>
+                  <Space direction="vertical">
+                    <Typography.Text>Update Password</Typography.Text>
+                    <Switch onChange={(val) => setIsResettingPassword(val)} />
+                  </Space>
+                </Col>
+              )}
+              {(!isEditing || isResettingPassword) && (
+                <Col span={12}>
+                  <Form.Item
+                    label="Password"
+                    name={"password"}
+                    rules={[
+                      {
+                        required: true,
+                        message: "Password is required",
+                      },
+                      {
+                        pattern:
+                          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/,
+                        message:
+                          "Password must be 8-20 characters and include uppercase, lowercase, number, and special character",
+                      },
+                    ]}
+                  >
+                    <Input.Password size={"large"} placeholder="*******" />
+                  </Form.Item>
+                </Col>
+              )}
             </Row>
           </Card>
 
@@ -112,6 +152,7 @@ export const UserForm = () => {
                   ]}
                 >
                   <Select<UserRole>
+                    id="userFormRole"
                     options={selectRolesOptions}
                     placeholder={"Role"}
                     allowClear
@@ -119,8 +160,10 @@ export const UserForm = () => {
                       width: "100%",
                     }}
                     size="large"
-                    onChange={(role) => {
-                      setRole(role);
+                    onChange={(value) => {
+                      if (value !== "manager") {
+                        form.setFieldsValue({ tenantId: undefined });
+                      }
                     }}
                   />
                 </Form.Item>
@@ -138,10 +181,28 @@ export const UserForm = () => {
                     ]}
                   >
                     <Select
-                      options={data?.data.map((tenant) => ({
-                        value: tenant.id,
-                        label: tenant.name,
-                      }))}
+                      id="userFormRestaurant"
+                      loading={isLoading || isFetchingNextPage}
+                      filterOption={false}
+                      options={data?.pages.flatMap((page) =>
+                        page.data.map((t) => ({ value: t.id, label: t.name }))
+                      )}
+                      labelRender={({ label }) =>
+                        tenant && tenant.id === changedTenantId
+                          ? `${tenant.name}`
+                          : label
+                      }
+                      onSearch={onSearch}
+                      onPopupScroll={(e) => {
+                        const target = e.target as HTMLElement;
+                        if (
+                          target.scrollTop + target.clientHeight >=
+                            target.scrollHeight - 2 &&
+                          hasNextPage
+                        ) {
+                          fetchNextPage();
+                        }
+                      }}
                       placeholder={"Restaurant"}
                       allowClear
                       showSearch
@@ -164,7 +225,7 @@ export const UserForm = () => {
                   name={"isBanned"}
                   initialValue={false}
                 >
-                  <Switch />
+                  <Switch id="userFormIsBanned" />
                 </Form.Item>
               </Col>
             </Row>

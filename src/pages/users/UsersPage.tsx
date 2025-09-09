@@ -28,6 +28,7 @@ import { PER_PAGE } from "../../constants";
 import type { FieldData } from "../../types/common.type";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
+import { useUpdateUser } from "../../hooks/api/useUpdateUser";
 
 const breadcrumb = [
   {
@@ -116,10 +117,23 @@ const UsersPage = () => {
     token: { colorBgLayout },
   } = theme.useToken();
   const { mutate } = useCreateUser();
+  const { mutate: mutateUpdate } = useUpdateUser();
+
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const onHandleSubmit = async () => {
     await form.validateFields();
     mutate(form.getFieldsValue());
+    form.resetFields();
+    setOpenDrawer(false);
+  };
+
+  const onHandleUpdate = async (id: number) => {
+    await form.validateFields();
+    mutateUpdate({
+      id: id,
+      userData: form.getFieldsValue(),
+    });
     form.resetFields();
     setOpenDrawer(false);
   };
@@ -151,6 +165,13 @@ const UsersPage = () => {
       }));
     }
   };
+
+  useEffect(() => {
+    if (editingUser) {
+      setOpenDrawer(true);
+      form.setFieldsValue({ ...editingUser, tenantId: editingUser.tenant?.id });
+    }
+  }, [editingUser, form]);
 
   useEffect(() => {
     return () => {
@@ -200,7 +221,22 @@ const UsersPage = () => {
         </Form>
 
         <Table
-          columns={tableColumns}
+          columns={[
+            ...tableColumns,
+            {
+              title: "Actions",
+              render: (_: string, record: User) => {
+                return (
+                  <Space>
+                    <Button type="link" onClick={() => setEditingUser(record)}>
+                      Edit
+                    </Button>
+                    <Button type="link">Delete</Button>
+                  </Space>
+                );
+              },
+            },
+          ]}
           dataSource={data?.data}
           loading={isLoading}
           rowKey={"id"}
@@ -223,12 +259,13 @@ const UsersPage = () => {
         />
       </Space>
       <Drawer
-        title="Create User"
+        title={editingUser ? "Editing User" : "Create User"}
         width={720}
         destroyOnHidden={true}
         onClose={() => {
           form.resetFields();
           setOpenDrawer(false);
+          setEditingUser(null);
         }}
         styles={{
           body: {
@@ -242,18 +279,26 @@ const UsersPage = () => {
               onClick={() => {
                 form.resetFields();
                 setOpenDrawer(false);
+                setEditingUser(null);
               }}
             >
               Cancel
             </Button>
-            <Button type="primary" onClick={onHandleSubmit}>
+            <Button
+              type="primary"
+              onClick={
+                editingUser
+                  ? onHandleUpdate.bind(this, editingUser.id)
+                  : onHandleSubmit
+              }
+            >
               Submit
             </Button>
           </Space>
         }
       >
         <Form layout="vertical" form={form}>
-          <UserForm />
+          <UserForm tenant={editingUser?.tenant} isEditing={!!editingUser} />
         </Form>
       </Drawer>
     </>

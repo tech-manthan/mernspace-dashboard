@@ -29,8 +29,16 @@ export interface CreateUserData {
   role: UserRole;
   isBanned: boolean;
   tenant: Tenant | null;
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+export interface UpdateUserData {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+  role?: UserRole;
+  isBanned?: boolean;
+  tenant?: Tenant | null;
 }
 
 export interface UsersQueryParams {
