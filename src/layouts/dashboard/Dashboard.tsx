@@ -1,15 +1,21 @@
 import { lazy, Suspense } from "react";
 import DashboardFallback from "./DashboardFallback";
 import { useAuthStore } from "../../store/auth.store";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
 const DashboardMain = lazy(() => import("./DahboardMain"));
 
 const Dashboard = () => {
   const { hasUser } = useAuthStore();
+  const location = useLocation();
 
   if (!hasUser()) {
-    return <Navigate to={"/auth/login"} replace={true} />;
+    return (
+      <Navigate
+        to={`/auth/login?returnTo=${location.pathname}`}
+        replace={true}
+      />
+    );
   }
 
   return (

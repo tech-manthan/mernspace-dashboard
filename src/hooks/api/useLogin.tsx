@@ -5,7 +5,6 @@ import { useSelf } from "./useSelf";
 import { useLogout } from "./useLogout";
 import { useAuthStore } from "../../store/auth.store";
 import { usePermission } from "../usePermission";
-import { useNavigate } from "react-router-dom";
 import type { ResponseError } from "../../types/error.type";
 import { useToast } from "../useToast";
 
@@ -23,7 +22,6 @@ export const useLogin = () => {
   const { setUser } = useAuthStore();
   const toast = useToast();
   const { isAllowed } = usePermission();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationKey: ["login"],
@@ -49,11 +47,6 @@ export const useLogin = () => {
       setUser(result.data);
       toast.success({
         content: "Login Successfull",
-        onClose: () => {
-          navigate("/", {
-            replace: true,
-          });
-        },
       });
     },
     onError: async (error) => {
