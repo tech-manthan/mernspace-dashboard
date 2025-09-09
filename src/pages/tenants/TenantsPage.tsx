@@ -22,6 +22,7 @@ import { PER_PAGE } from "../../constants";
 import type { TenantsQueryParams } from "../../types/tenant.type";
 import type { FieldData } from "../../types/common.type";
 import { debounce } from "lodash";
+import dayjs from "dayjs";
 
 const breadcrumb = [
   {
@@ -54,6 +55,9 @@ const tableColumns = [
     title: "Created At",
     dataIndex: "createdAt",
     key: "createdAt",
+    render: (date: Date) => {
+      return dayjs(date).format("DD/MM/YYYY");
+    },
   },
 ];
 
@@ -87,7 +91,7 @@ const TenantsPage = () => {
   const debouncedQUpdate = useMemo(
     () =>
       debounce((value: string) => {
-        setQueryParams((prev) => ({ ...prev, q: value }));
+        setQueryParams((prev) => ({ ...prev, q: value, currentPage: 1 }));
       }, 500),
     []
   );
@@ -103,7 +107,11 @@ const TenantsPage = () => {
     if ("q" in changedFilterFields) {
       debouncedQUpdate(changedFilterFields["q"] as string);
     } else {
-      setQueryParams((prev) => ({ ...prev, ...changedFilterFields }));
+      setQueryParams((prev) => ({
+        ...prev,
+        ...changedFilterFields,
+        currentPage: 1,
+      }));
     }
   };
 

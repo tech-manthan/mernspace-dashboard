@@ -27,6 +27,7 @@ import { useCreateUser } from "../../hooks/api/useCreateUser";
 import { PER_PAGE } from "../../constants";
 import type { FieldData } from "../../types/common.type";
 import { debounce } from "lodash";
+import dayjs from "dayjs";
 
 const breadcrumb = [
   {
@@ -75,16 +76,19 @@ const tableColumns = [
     key: "role",
   },
   {
-    title: "Created At",
-    dataIndex: "createdAt",
-    key: "createdAt",
-  },
-  {
     title: "Tenant",
     dataIndex: "tenant",
     key: "tenant",
     render: (tenant: Tenant | null, record: User) => {
-      return <div key={record.id}>{tenant ? tenant.name : "None"}</div>;
+      return <div key={record.id}>{tenant ? tenant.name : ""}</div>;
+    },
+  },
+  {
+    title: "Created At",
+    dataIndex: "createdAt",
+    key: "createdAt",
+    render: (date: Date) => {
+      return dayjs(date).format("DD/MM/YYYY");
     },
   },
 ];
@@ -123,7 +127,7 @@ const UsersPage = () => {
   const debouncedQUpdate = useMemo(
     () =>
       debounce((value: string) => {
-        setQueryParams((prev) => ({ ...prev, q: value }));
+        setQueryParams((prev) => ({ ...prev, q: value, currentPage: 1 }));
       }, 500),
     []
   );
@@ -140,7 +144,11 @@ const UsersPage = () => {
     if ("q" in changedFilterFields) {
       debouncedQUpdate(changedFilterFields["q"] as string);
     } else {
-      setQueryParams((prev) => ({ ...prev, ...changedFilterFields }));
+      setQueryParams((prev) => ({
+        ...prev,
+        ...changedFilterFields,
+        currentPage: 1,
+      }));
     }
   };
 
