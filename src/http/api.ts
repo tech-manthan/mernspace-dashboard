@@ -1,5 +1,5 @@
 import type { LoginData } from "../types/auth.type";
-import type { CreateTenantData } from "../types/tenant.type";
+import type { CreateTenantData, UpdateTenantData } from "../types/tenant.type";
 import type { CreateUserData, UpdateUserData } from "../types/user.type";
 import { api } from "./client";
 
@@ -18,3 +18,5 @@ export const getTenants = (queryString: string) =>
 export const getTenant = (id: number) => api.get(`/tenants/${id}`);
 export const createTenant = (data: CreateTenantData) =>
   api.post("/tenants", data);
+export const updateTenant = (id: number, data: UpdateTenantData) =>
+  api.patch(`/tenants/${id}`, data);

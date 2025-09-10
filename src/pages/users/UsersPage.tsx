@@ -1,4 +1,6 @@
 import {
+  DeleteOutlined,
+  EditOutlined,
   LoadingOutlined,
   PlusOutlined,
   RightOutlined,
@@ -123,19 +125,21 @@ const UsersPage = () => {
 
   const onHandleSubmit = async () => {
     await form.validateFields();
-    mutate(form.getFieldsValue());
-    form.resetFields();
-    setOpenDrawer(false);
-  };
 
-  const onHandleUpdate = async (id: number) => {
-    await form.validateFields();
-    mutateUpdate({
-      id: id,
-      userData: form.getFieldsValue(),
-    });
+    const isEditing = !!editingUser;
+
+    if (isEditing) {
+      mutateUpdate({
+        id: editingUser.id,
+        userData: form.getFieldsValue(),
+      });
+    } else {
+      mutate(form.getFieldsValue());
+    }
+
     form.resetFields();
     setOpenDrawer(false);
+    setEditingUser(null);
   };
 
   const debouncedQUpdate = useMemo(
@@ -225,13 +229,21 @@ const UsersPage = () => {
             ...tableColumns,
             {
               title: "Actions",
+              align: "center",
               render: (_: string, record: User) => {
                 return (
-                  <Space>
-                    <Button type="link" onClick={() => setEditingUser(record)}>
-                      Edit
-                    </Button>
-                    <Button type="link">Delete</Button>
+                  <Space size={2}>
+                    <Button
+                      type="link"
+                      icon={<EditOutlined />}
+                      size="large"
+                      onClick={() => setEditingUser(record)}
+                    />
+                    <Button
+                      type="link"
+                      size="large"
+                      icon={<DeleteOutlined />}
+                    />
                   </Space>
                 );
               },
@@ -284,14 +296,7 @@ const UsersPage = () => {
             >
               Cancel
             </Button>
-            <Button
-              type="primary"
-              onClick={
-                editingUser
-                  ? onHandleUpdate.bind(this, editingUser.id)
-                  : onHandleSubmit
-              }
-            >
+            <Button type="primary" onClick={onHandleSubmit}>
               Submit
             </Button>
           </Space>

@@ -16,13 +16,19 @@ import {
   theme,
 } from "antd";
 import { TenantForm, TenantsFilter } from "../../components/tenants";
-import { PlusOutlined, RightOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import { useCreateTenant } from "../../hooks/api/useCreateTenant";
 import { PER_PAGE } from "../../constants";
-import type { TenantsQueryParams } from "../../types/tenant.type";
+import type { Tenant, TenantsQueryParams } from "../../types/tenant.type";
 import type { FieldData } from "../../types/common.type";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
+import { useUpdateTenant } from "../../hooks/api/useUpdateTenant";
 
 const breadcrumb = [
   {
@@ -79,13 +85,25 @@ const TenantsPage = () => {
   const {
     token: { colorBgLayout },
   } = theme.useToken();
+  const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
+
   const { mutate } = useCreateTenant();
+  const { mutate: mutateUpdate } = useUpdateTenant();
 
   const onHandleSubmit = async () => {
     await form.validateFields();
-    mutate(form.getFieldsValue());
+    const isEditing = !!editingTenant;
+    if (isEditing) {
+      mutateUpdate({
+        id: editingTenant.id,
+        tenantData: form.getFieldsValue(),
+      });
+    } else {
+      mutate(form.getFieldsValue());
+    }
     form.resetFields();
     setOpenDrawer(false);
+    setEditingTenant(null);
   };
 
   const debouncedQUpdate = useMemo(
@@ -114,6 +132,13 @@ const TenantsPage = () => {
       }));
     }
   };
+
+  useEffect(() => {
+    if (editingTenant) {
+      setOpenDrawer(true);
+      form.setFieldsValue(editingTenant);
+    }
+  }, [editingTenant, form]);
 
   useEffect(() => {
     return () => {
@@ -161,7 +186,25 @@ const TenantsPage = () => {
         </Form>
 
         <Table
-          columns={tableColumns}
+          columns={[
+            ...tableColumns,
+            {
+              title: "Actions",
+              align: "center",
+              render: (_: string, record: Tenant) => {
+                return (
+                  <Space>
+                    <Button
+                      type="link"
+                      onClick={() => setEditingTenant(record)}
+                      icon={<EditOutlined />}
+                    />
+                    <Button type="link" icon={<DeleteOutlined />} />
+                  </Space>
+                );
+              },
+            },
+          ]}
           dataSource={data?.data}
           loading={isLoading}
           rowKey={"id"}
@@ -185,12 +228,13 @@ const TenantsPage = () => {
         />
       </Space>
       <Drawer
-        title="Create Restaurant"
+        title={editingTenant ? "Update Restaurant" : "Create Restaurant"}
         width={720}
         destroyOnHidden={true}
         onClose={() => {
           form.resetFields();
           setOpenDrawer(false);
+          setEditingTenant(null);
         }}
         styles={{
           body: {
@@ -204,6 +248,7 @@ const TenantsPage = () => {
               onClick={() => {
                 form.resetFields();
                 setOpenDrawer(false);
+                setEditingTenant(null);
               }}
             >
               Cancel
