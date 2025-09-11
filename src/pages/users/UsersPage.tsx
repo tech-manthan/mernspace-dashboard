@@ -305,6 +305,9 @@ const UsersPage = () => {
               return `Showing ${range[0]}-${range[1]} of ${total} items`;
             },
           }}
+          scroll={{
+            x: "max-content",
+          }}
         />
       </Space>
       <Drawer

@@ -250,7 +250,6 @@ const TenantsPage = () => {
             pageSize: queryParams.perPage,
             current: queryParams.currentPage,
             onChange: (page) => {
-              console.log(page);
               setQueryParams((prev) => {
                 return {
                   ...prev,
@@ -261,6 +260,9 @@ const TenantsPage = () => {
             showTotal: (total, range) => {
               return `Showing ${range[0]}-${range[1]} of ${total} items`;
             },
+          }}
+          scroll={{
+            x: "max-content",
           }}
         />
       </Space>

@@ -15,17 +15,17 @@ export default function HomePage() {
   const { user } = useAuthStore();
   const [salesFilter, setSalesFilter] = useState<SalesTimePeriodFilter>("M");
 
-  console.log(salesFilter);
   return (
     <>
       <Title level={4}>Welcome, {user?.firstName} 😀</Title>
       <Row gutter={[16, 16]}>
-        <Col span={24} sm={12}>
+        <Col span={24} lg={12}>
           <Row gutter={[16, 16]}>
             <Col span={24} sm={12}>
               <Card
                 style={{
                   borderRadius: 5,
+                  height: "100%",
                 }}
               >
                 <Flex align="flex-start" gap={10}>
@@ -33,9 +33,9 @@ export default function HomePage() {
                     component={BuisnessBag}
                     style={{
                       color: "#29ff0dff",
-                      fontSize: 18,
+                      fontSize: 14,
                       backgroundColor: "#32fd1f63",
-                      padding: 8,
+                      padding: 6,
                       borderRadius: 10,
                     }}
                   />
@@ -51,7 +51,7 @@ export default function HomePage() {
                       value={10000}
                       valueStyle={{
                         fontWeight: "bold",
-                        fontSize: 30,
+                        fontSize: 24,
                       }}
                     />
                   </Flex>
@@ -62,6 +62,7 @@ export default function HomePage() {
               <Card
                 style={{
                   borderRadius: 5,
+                  height: "100%",
                 }}
               >
                 <Flex gap={10} align="flex-start">
@@ -69,9 +70,9 @@ export default function HomePage() {
                     component={BarChart}
                     style={{
                       color: "#0dbaffff",
-                      fontSize: 18,
+                      fontSize: 14,
                       backgroundColor: "#38f2ff63",
-                      padding: 8,
+                      padding: 6,
                       borderRadius: 10,
                     }}
                   />
@@ -87,7 +88,7 @@ export default function HomePage() {
                       value={50000}
                       valueStyle={{
                         fontWeight: "bold",
-                        fontSize: 30,
+                        fontSize: 24,
                       }}
                       prefix={"$"}
                     />
@@ -121,9 +122,9 @@ export default function HomePage() {
                       component={BarChart}
                       style={{
                         color: "#0dbaffff",
-                        fontSize: 18,
+                        fontSize: 14,
                         backgroundColor: "#38f2ff63",
-                        padding: 8,
+                        padding: 6,
                         borderRadius: 10,
                       }}
                     />
@@ -195,7 +196,7 @@ export default function HomePage() {
             </Col>
           </Row>
         </Col>
-        <Col span={24} sm={12}>
+        <Col span={24} lg={12}>
           <Card
             style={{
               borderRadius: 5,
@@ -207,9 +208,9 @@ export default function HomePage() {
                 component={BuisnessBag}
                 style={{
                   color: "#ff660dff",
-                  fontSize: 18,
+                  fontSize: 14,
                   backgroundColor: "#fd9d1f63",
-                  padding: 8,
+                  padding: 6,
                   borderRadius: 10,
                 }}
               />
