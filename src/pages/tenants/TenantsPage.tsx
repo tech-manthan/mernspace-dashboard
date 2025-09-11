@@ -101,9 +101,16 @@ const TenantsPage = () => {
     await form.validateFields();
     const isEditing = !!editingTenant;
     if (isEditing) {
+      const values = form.getFieldsValue({}) as Record<string, unknown>;
+      const changedValues: Record<string, unknown> = {};
+      for (const key in values) {
+        if (form.isFieldTouched(key)) {
+          changedValues[key] = values[key];
+        }
+      }
       mutateUpdate({
         id: editingTenant.id,
-        tenantData: form.getFieldsValue(),
+        tenantData: changedValues,
       });
     } else {
       mutate(form.getFieldsValue());

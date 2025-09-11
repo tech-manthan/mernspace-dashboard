@@ -146,7 +146,6 @@ const UsersPage = () => {
           changedValues["role"] = "manager";
         }
       }
-      console.log(changedValues);
       mutateUpdate({
         id: editingUser.id,
         userData: changedValues,
