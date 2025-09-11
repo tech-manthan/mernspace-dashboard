@@ -135,9 +135,21 @@ const UsersPage = () => {
     const isEditing = !!editingUser;
 
     if (isEditing) {
+      const values = form.getFieldsValue({}) as Record<string, unknown>;
+      const changedValues: Record<string, unknown> = {};
+      for (const key in values) {
+        if (form.isFieldTouched(key)) {
+          changedValues[key] = values[key];
+        }
+
+        if (key === "tenantId" && changedValues[key]) {
+          changedValues["role"] = "manager";
+        }
+      }
+      console.log(changedValues);
       mutateUpdate({
         id: editingUser.id,
-        userData: form.getFieldsValue(),
+        userData: changedValues,
       });
     } else {
       mutate(form.getFieldsValue());

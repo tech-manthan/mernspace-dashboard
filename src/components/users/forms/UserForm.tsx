@@ -153,7 +153,9 @@ export const UserForm = ({ tenant, isEditing = false }: UserFormProps) => {
                 >
                   <Select<UserRole>
                     id="userFormRole"
-                    options={selectRolesOptions}
+                    options={selectRolesOptions.filter(
+                      (option) => option.value !== "customer"
+                    )}
                     placeholder={"Role"}
                     allowClear
                     style={{
