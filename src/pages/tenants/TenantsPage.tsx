@@ -10,10 +10,12 @@ import {
   Drawer,
   Flex,
   Form,
+  Modal,
   Space,
   Spin,
   Table,
   theme,
+  Typography,
 } from "antd";
 import { TenantForm, TenantsFilter } from "../../components/tenants";
 import {
@@ -29,6 +31,7 @@ import type { FieldData } from "../../types/common.type";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
 import { useUpdateTenant } from "../../hooks/api/useUpdateTenant";
+import { useDeleteTenant } from "../../hooks/api/useDeleteTenant";
 
 const breadcrumb = [
   {
@@ -73,6 +76,8 @@ const TenantsPage = () => {
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+
   const [queryParams, setQueryParams] = useState<TenantsQueryParams>({
     perPage: PER_PAGE,
     currentPage: 1,
@@ -86,9 +91,11 @@ const TenantsPage = () => {
     token: { colorBgLayout },
   } = theme.useToken();
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
+  const [deletingTenant, setDeletingTenant] = useState<Tenant | null>(null);
 
   const { mutate } = useCreateTenant();
   const { mutate: mutateUpdate } = useUpdateTenant();
+  const { mutate: mutateDelete, isPending } = useDeleteTenant();
 
   const onHandleSubmit = async () => {
     await form.validateFields();
@@ -104,6 +111,19 @@ const TenantsPage = () => {
     form.resetFields();
     setOpenDrawer(false);
     setEditingTenant(null);
+  };
+
+  const onHandleDelete = async () => {
+    const isDeleting = !!deletingTenant;
+
+    if (isDeleting) {
+      mutateDelete(deletingTenant.id, {
+        onSettled: () => {
+          setOpenModal(false);
+          setDeletingTenant(null);
+        },
+      });
+    }
   };
 
   const debouncedQUpdate = useMemo(
@@ -139,6 +159,12 @@ const TenantsPage = () => {
       form.setFieldsValue(editingTenant);
     }
   }, [editingTenant, form]);
+
+  useEffect(() => {
+    if (deletingTenant) {
+      setOpenModal(true);
+    }
+  }, [deletingTenant]);
 
   useEffect(() => {
     return () => {
@@ -199,7 +225,11 @@ const TenantsPage = () => {
                       onClick={() => setEditingTenant(record)}
                       icon={<EditOutlined />}
                     />
-                    <Button type="link" icon={<DeleteOutlined />} />
+                    <Button
+                      type="link"
+                      icon={<DeleteOutlined />}
+                      onClick={() => setDeletingTenant(record)}
+                    />
                   </Space>
                 );
               },
@@ -263,6 +293,21 @@ const TenantsPage = () => {
           <TenantForm />
         </Form>
       </Drawer>
+      <Modal
+        title={"Deleting Restaurant"}
+        open={openModal}
+        onOk={onHandleDelete}
+        confirmLoading={isPending}
+        onCancel={() => {
+          setDeletingTenant(null);
+          setOpenModal(false);
+        }}
+        okText={"Delete"}
+      >
+        <Typography.Paragraph>
+          Do you want to delete the Restaurant
+        </Typography.Paragraph>
+      </Modal>
     </>
   );
 };

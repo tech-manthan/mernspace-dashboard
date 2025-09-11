@@ -11,10 +11,12 @@ import {
   Drawer,
   Flex,
   Form,
+  Modal,
   Space,
   Spin,
   Table,
   theme,
+  Typography,
 } from "antd";
 import { Link, Navigate } from "react-router-dom";
 import { useGetUsers } from "../../hooks/api/useGetUsers";
@@ -31,6 +33,7 @@ import type { FieldData } from "../../types/common.type";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
 import { useUpdateUser } from "../../hooks/api/useUpdateUser";
+import { useDeleteUser } from "../../hooks/api/useDeleteUser";
 
 const breadcrumb = [
   {
@@ -103,6 +106,7 @@ const UsersPage = () => {
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
 
   const [queryParams, setQueryParams] = useState<UsersQueryParams>({
     perPage: PER_PAGE,
@@ -120,8 +124,10 @@ const UsersPage = () => {
   } = theme.useToken();
   const { mutate } = useCreateUser();
   const { mutate: mutateUpdate } = useUpdateUser();
+  const { mutate: mutateDelete, isPending } = useDeleteUser();
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
 
   const onHandleSubmit = async () => {
     await form.validateFields();
@@ -140,6 +146,19 @@ const UsersPage = () => {
     form.resetFields();
     setOpenDrawer(false);
     setEditingUser(null);
+  };
+
+  const onHandleDelete = async () => {
+    const isDeleting = !!deletingUser;
+
+    if (isDeleting) {
+      mutateDelete(deletingUser.id, {
+        onSettled: () => {
+          setOpenModal(false);
+          setDeletingUser(null);
+        },
+      });
+    }
   };
 
   const debouncedQUpdate = useMemo(
@@ -176,6 +195,12 @@ const UsersPage = () => {
       form.setFieldsValue({ ...editingUser, tenantId: editingUser.tenant?.id });
     }
   }, [editingUser, form]);
+
+  useEffect(() => {
+    if (deletingUser) {
+      setOpenModal(true);
+    }
+  }, [deletingUser]);
 
   useEffect(() => {
     return () => {
@@ -243,6 +268,7 @@ const UsersPage = () => {
                       type="link"
                       size="large"
                       icon={<DeleteOutlined />}
+                      onClick={() => setDeletingUser(record)}
                     />
                   </Space>
                 );
@@ -306,6 +332,21 @@ const UsersPage = () => {
           <UserForm tenant={editingUser?.tenant} isEditing={!!editingUser} />
         </Form>
       </Drawer>
+      <Modal
+        title={"Deleting User"}
+        open={openModal}
+        onOk={onHandleDelete}
+        confirmLoading={isPending}
+        onCancel={() => {
+          setDeletingUser(null);
+          setOpenModal(false);
+        }}
+        okText={"Delete"}
+      >
+        <Typography.Paragraph>
+          Do you want to delete the user
+        </Typography.Paragraph>
+      </Modal>
     </>
   );
 };
