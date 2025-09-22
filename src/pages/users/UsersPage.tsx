@@ -122,9 +122,10 @@ const UsersPage = () => {
   const {
     token: { colorBgLayout },
   } = theme.useToken();
-  const { mutate } = useCreateUser();
-  const { mutate: mutateUpdate } = useUpdateUser();
-  const { mutate: mutateDelete, isPending } = useDeleteUser();
+
+  const { mutate: mutateCreate, isPending: isCreatePending } = useCreateUser();
+  const { mutate: mutateUpdate, isPending: isUpdatePending } = useUpdateUser();
+  const { mutate: mutateDelete, isPending: isDeletePending } = useDeleteUser();
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
@@ -146,17 +147,27 @@ const UsersPage = () => {
           changedValues["role"] = "manager";
         }
       }
-      mutateUpdate({
-        id: editingUser.id,
-        userData: changedValues,
-      });
+      mutateUpdate(
+        {
+          id: editingUser.id,
+          userData: changedValues,
+        },
+        {
+          onSettled: () => {
+            form.resetFields();
+            setOpenDrawer(false);
+            setEditingUser(null);
+          },
+        }
+      );
     } else {
-      mutate(form.getFieldsValue());
+      mutateCreate(form.getFieldsValue(), {
+        onSettled: () => {
+          form.resetFields();
+          setOpenDrawer(false);
+        },
+      });
     }
-
-    form.resetFields();
-    setOpenDrawer(false);
-    setEditingUser(null);
   };
 
   const onHandleDelete = async () => {
@@ -336,7 +347,11 @@ const UsersPage = () => {
             >
               Cancel
             </Button>
-            <Button type="primary" onClick={onHandleSubmit}>
+            <Button
+              type="primary"
+              onClick={onHandleSubmit}
+              loading={isCreatePending || isUpdatePending}
+            >
               Submit
             </Button>
           </Space>
@@ -350,7 +365,7 @@ const UsersPage = () => {
         title={"Deleting User"}
         open={openModal}
         onOk={onHandleDelete}
-        confirmLoading={isPending}
+        confirmLoading={isDeletePending}
         onCancel={() => {
           setDeletingUser(null);
           setOpenModal(false);

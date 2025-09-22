@@ -1,16 +1,19 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { getTenants } from "../../http/api";
-import type { GetTenants, TenantsQueryParams } from "../../types/tenant.type";
+import { getCategories } from "../../http/api";
 import { PER_PAGE } from "../../constants";
+import type {
+  CategoriesQueryParams,
+  GetCategories,
+} from "../../types/category.type";
 
-const getTenantsData = async (queryString: string) => {
-  const { data } = await getTenants(queryString);
+const getCategoriesData = async (queryString: string) => {
+  const { data } = await getCategories(queryString);
   return data;
 };
 
-export const useGetTenants = (
+export const useGetCategories = (
   enabled: boolean = true,
-  queryParams: TenantsQueryParams = {
+  queryParams: CategoriesQueryParams = {
     currentPage: 1,
     perPage: PER_PAGE,
     q: "",
@@ -27,12 +30,10 @@ export const useGetTenants = (
       );
     })
   );
-  const queryString = new URLSearchParams(
-    filteredParams as unknown as Record<string, string>
-  ).toString();
-  return useQuery<GetTenants>({
-    queryKey: ["getTenants", queryParams],
-    queryFn: getTenantsData.bind(this, queryString),
+  const queryString = new URLSearchParams(filteredParams).toString();
+  return useQuery<GetCategories>({
+    queryKey: ["getCategories", queryParams],
+    queryFn: getCategoriesData.bind(this, queryString),
     enabled,
     placeholderData: keepPreviousData,
   });

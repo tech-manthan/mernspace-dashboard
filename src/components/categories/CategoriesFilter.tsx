@@ -1,11 +1,11 @@
 import { Card, Col, Form, Input, Row } from "antd";
 import type { ReactNode } from "react";
 
-type TenantsFilterProps = {
+type CategoriesFilterProps = {
   children?: ReactNode;
 };
 
-export const TenantsFilter = ({ children }: TenantsFilterProps) => {
+export const CategoriesFilter = ({ children }: CategoriesFilterProps) => {
   return (
     <Card>
       <Row justify={"space-between"}>

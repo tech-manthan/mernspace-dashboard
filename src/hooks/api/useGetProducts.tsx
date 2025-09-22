@@ -1,19 +1,25 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { getTenants } from "../../http/api";
-import type { GetTenants, TenantsQueryParams } from "../../types/tenant.type";
+import { getProducts } from "../../http/api";
 import { PER_PAGE } from "../../constants";
+import type {
+  GetProducts,
+  ProductsQueryParams,
+} from "../../types/product.type";
 
-const getTenantsData = async (queryString: string) => {
-  const { data } = await getTenants(queryString);
+const getProductsData = async (queryString: string) => {
+  const { data } = await getProducts(queryString);
   return data;
 };
 
-export const useGetTenants = (
+export const useGetProducts = (
   enabled: boolean = true,
-  queryParams: TenantsQueryParams = {
+  queryParams: ProductsQueryParams = {
     currentPage: 1,
     perPage: PER_PAGE,
     q: "",
+    categoryId: "",
+    isPublish: undefined,
+    tenantId: "",
   }
 ) => {
   const filteredParams = Object.fromEntries(
@@ -27,12 +33,11 @@ export const useGetTenants = (
       );
     })
   );
-  const queryString = new URLSearchParams(
-    filteredParams as unknown as Record<string, string>
-  ).toString();
-  return useQuery<GetTenants>({
-    queryKey: ["getTenants", queryParams],
-    queryFn: getTenantsData.bind(this, queryString),
+
+  const queryString = new URLSearchParams(filteredParams).toString();
+  return useQuery<GetProducts>({
+    queryKey: ["getProducts", queryParams],
+    queryFn: getProductsData.bind(this, queryString),
     enabled,
     placeholderData: keepPreviousData,
   });

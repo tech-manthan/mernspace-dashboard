@@ -19,7 +19,15 @@ export const useGetUsers = (
   }
 ) => {
   const filteredParams = Object.fromEntries(
-    Object.entries(queryParams).filter((item) => !!item[1])
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    Object.entries(queryParams).filter(([_, value]) => {
+      return (
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        value !== "undefined"
+      );
+    })
   );
   const queryString = new URLSearchParams(
     filteredParams as unknown as Record<string, string>

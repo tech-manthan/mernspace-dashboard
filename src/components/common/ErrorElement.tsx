@@ -2,7 +2,7 @@ import { Button, Result } from "antd";
 import { Error } from "../icons";
 import { useNavigate } from "react-router-dom";
 
-const ErrorElement = () => {
+export const ErrorElement = () => {
   const navigate = useNavigate();
   return (
     <Result
@@ -25,5 +25,3 @@ const ErrorElement = () => {
     />
   );
 };
-
-export default ErrorElement;

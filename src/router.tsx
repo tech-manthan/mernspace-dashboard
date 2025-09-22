@@ -5,9 +5,12 @@ import {
   NotFoundPage,
   UsersPage,
   TenantsPage,
+  CategoriesPage,
+  ProductsPage,
+  ToppingsPage,
 } from "./pages";
 import { Dashboard, NonAuth, Root } from "./layouts";
-import ErrorElement from "./components/common/ErrorElement";
+import { ErrorElement } from "./components/common";
 
 export const router = createBrowserRouter([
   {
@@ -30,6 +33,18 @@ export const router = createBrowserRouter([
           {
             path: "restaurants",
             element: <TenantsPage />,
+          },
+          {
+            path: "categories",
+            element: <CategoriesPage />,
+          },
+          {
+            path: "products",
+            element: <ProductsPage />,
+          },
+          {
+            path: "toppings",
+            element: <ToppingsPage />,
           },
         ],
       },

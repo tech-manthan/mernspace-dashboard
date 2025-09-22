@@ -24,6 +24,7 @@ import {
   Home,
   Logo,
   LogoCircle,
+  Topping,
   User,
 } from "../../components/icons";
 import { useAuthStore } from "../../store/auth.store";
@@ -39,15 +40,16 @@ const getMenuItems = (role: UserRole) => {
       icon: <Icon component={Home} />,
       label: <NavLink to={"/"}>Home</NavLink>,
     },
-    {
-      key: "/categories",
-      icon: <Icon component={Category} />,
-      label: <NavLink to={"/categories"}>Categories</NavLink>,
-    },
+
     {
       key: "/products",
       icon: <Icon component={Basket} />,
       label: <NavLink to={"/products"}>Products</NavLink>,
+    },
+    {
+      key: "/toppings",
+      icon: <Icon component={Topping} />,
+      label: <NavLink to={"/toppings"}>Toppings</NavLink>,
     },
     {
       key: "/promos",
@@ -70,6 +72,11 @@ const getMenuItems = (role: UserRole) => {
         key: "/restaurants",
         icon: <Icon component={Food} />,
         label: <NavLink to={"/restaurants"}>Restaurants</NavLink>,
+      },
+      {
+        key: "/categories",
+        icon: <Icon component={Category} />,
+        label: <NavLink to={"/categories"}>Categories</NavLink>,
       }
     );
     return items;

@@ -1,147 +1,178 @@
-import { useEffect, useMemo, useState } from "react";
-import { useToast } from "../../hooks/useToast";
-import { useAuthStore } from "../../store/auth.store";
-import { useGetTenants } from "../../hooks/api/useGetTenants";
-import type { ResponseError } from "../../types/error.type";
-import { Link, Navigate } from "react-router-dom";
+import {
+  DeleteOutlined,
+  EditOutlined,
+  LoadingOutlined,
+  PlusOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 import {
   Breadcrumb,
   Button,
+  // Divider,
   Drawer,
   Flex,
   Form,
   Modal,
+  // Radio,
   Space,
   Spin,
+  // Switch,
   Table,
+  // Tag,
   theme,
   Typography,
 } from "antd";
-import { TenantForm, TenantsFilter } from "../../components/tenants";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  RightOutlined,
-} from "@ant-design/icons";
-import { PER_PAGE } from "../../constants";
-import type { Tenant, TenantsQueryParams } from "../../types/tenant.type";
-import type { FieldData } from "../../types/common.type";
+import { Link, Navigate } from "react-router-dom";
+import { useToast } from "../../hooks/useToast";
+import { useEffect, useMemo, useState } from "react";
+import type { ResponseError } from "../../types/error.type";
+import { useAuthStore } from "../../store/auth.store";
+import type { FieldData, PriceType } from "../../types/common.type";
 import { debounce } from "lodash";
 import dayjs from "dayjs";
-import { useUpdateTenant } from "../../hooks/api/useUpdateTenant";
-import { useDeleteTenant } from "../../hooks/api/useDeleteTenant";
-import { useCreateTenant } from "../../hooks/api/useCreateTenant";
+
+import type {
+  CategoriesQueryParams,
+  Category,
+  CategoryPriceConfiguration,
+} from "../../types/category.type";
+import { useGetCategories } from "../../hooks/api/useGetCategories";
+import { useCreateCategory } from "../../hooks/api/useCreateCategory";
+import { useUpdateCategory } from "../../hooks/api/useUpdateCategory";
+import { useDeleteCategory } from "../../hooks/api/useDeleteCategory";
+import { CategoriesFilter, CategoryForm } from "../../components/categories";
+import { PER_PAGE } from "../../constants";
 
 const breadcrumb = [
   {
     title: <Link to={"/"}>Dashboard</Link>,
   },
   {
-    title: "Restaurants",
+    title: "Categories",
   },
 ];
 
 const tableColumns = [
   {
-    title: "Id",
-    dataIndex: "id",
-    key: "id",
-  },
-  {
-    title: "Name",
+    title: "Category name",
     dataIndex: "name",
     key: "name",
   },
-
-  {
-    title: "Address",
-    dataIndex: "address",
-    key: "address",
-  },
-
   {
     title: "Created At",
     dataIndex: "createdAt",
     key: "createdAt",
-    render: (date: Date) => {
-      return dayjs(date).format("DD/MM/YYYY");
-    },
+    render: (date: string) => dayjs(date).format("DD/MM/YYYY"),
   },
 ];
 
-const TenantsPage = () => {
+const CategoriesPage = () => {
   const [form] = Form.useForm();
   const [filterForm] = Form.useForm();
+
   const { user } = useAuthStore();
   const toast = useToast();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [openModal, setOpenModal] = useState(false);
 
-  const [queryParams, setQueryParams] = useState<TenantsQueryParams>({
+  const [queryParams, setQueryParams] = useState<CategoriesQueryParams>({
     perPage: PER_PAGE,
     currentPage: 1,
     q: "",
   });
-  const { data, isLoading, isError, isFetching, error } = useGetTenants(
-    user?.role === "admin",
+  const { data, isFetching, isLoading, isError, error } = useGetCategories(
+    user?.role === "admin" || user?.role === "manager",
     queryParams
   );
   const {
     token: { colorBgLayout },
   } = theme.useToken();
-  const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
-  const [deletingTenant, setDeletingTenant] = useState<Tenant | null>(null);
-
   const { mutate: mutateCreate, isPending: isCreatePending } =
-    useCreateTenant();
+    useCreateCategory();
   const { mutate: mutateUpdate, isPending: isUpdatePending } =
-    useUpdateTenant();
+    useUpdateCategory();
   const { mutate: mutateDelete, isPending: isDeletePending } =
-    useDeleteTenant();
+    useDeleteCategory();
+
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(
+    null
+  );
 
   const onHandleSubmit = async () => {
     await form.validateFields();
-    const isEditing = !!editingTenant;
+
+    const priceConfigurationFormValue: Array<{
+      key: string;
+      priceType: PriceType;
+      availableOptions: string[];
+    }> = form.getFieldsValue().priceConfiguration || [];
+
+    const priceConfiguration: CategoryPriceConfiguration =
+      priceConfigurationFormValue.reduce(
+        (
+          acc: CategoryPriceConfiguration,
+          { key, priceType, availableOptions }
+        ) => {
+          acc[key] = { priceType, availableOptions };
+          return acc;
+        },
+        {}
+      );
+
+    const isEditing = !!editingCategory;
+
     if (isEditing) {
       const values = form.getFieldsValue({}) as Record<string, unknown>;
       const changedValues: Record<string, unknown> = {};
       for (const key in values) {
+        if (key === "priceConfiguration") {
+          continue;
+        }
         if (form.isFieldTouched(key)) {
           changedValues[key] = values[key];
         }
       }
+      if (form.isFieldTouched("priceConfiguration")) {
+        changedValues["priceConfiguration"] = priceConfiguration;
+      }
       mutateUpdate(
         {
-          id: editingTenant.id,
-          tenantData: changedValues,
+          id: editingCategory._id,
+          categoryData: changedValues,
         },
         {
           onSettled: () => {
             form.resetFields();
             setOpenDrawer(false);
-            setEditingTenant(null);
+            setEditingCategory(null);
           },
         }
       );
     } else {
-      mutateCreate(form.getFieldsValue(), {
-        onSettled: () => {
-          form.resetFields();
-          setOpenDrawer(false);
+      mutateCreate(
+        {
+          ...form.getFieldsValue(),
+          priceConfiguration,
         },
-      });
+        {
+          onSettled: () => {
+            form.resetFields();
+            setOpenDrawer(false);
+          },
+        }
+      );
     }
   };
 
   const onHandleDelete = async () => {
-    const isDeleting = !!deletingTenant;
+    const isDeleting = !!deletingCategory;
 
     if (isDeleting) {
-      mutateDelete(deletingTenant.id, {
+      mutateDelete(deletingCategory._id, {
         onSettled: () => {
           setOpenModal(false);
-          setDeletingTenant(null);
+          setDeletingCategory(null);
         },
       });
     }
@@ -155,7 +186,7 @@ const TenantsPage = () => {
     []
   );
 
-  const onFilterChange = (changedFields: FieldData[]) => {
+  const onFilterChange = async (changedFields: FieldData[]) => {
     const changedFilterFields = changedFields
       .map((item) => {
         return {
@@ -163,6 +194,7 @@ const TenantsPage = () => {
         };
       })
       .reduce((acc, item) => ({ ...acc, ...item }), {});
+
     if ("q" in changedFilterFields) {
       debouncedQUpdate(changedFilterFields["q"] as string);
     } else {
@@ -175,17 +207,24 @@ const TenantsPage = () => {
   };
 
   useEffect(() => {
-    if (editingTenant) {
+    if (editingCategory) {
       setOpenDrawer(true);
-      form.setFieldsValue(editingTenant);
+      const priceConfiguration = Object.entries(
+        editingCategory.priceConfiguration
+      ).map(([key, { priceType, availableOptions }]) => ({
+        key,
+        priceType,
+        availableOptions,
+      }));
+      form.setFieldsValue({ ...editingCategory, priceConfiguration });
     }
-  }, [editingTenant, form]);
+  }, [editingCategory, form]);
 
   useEffect(() => {
-    if (deletingTenant) {
+    if (deletingCategory) {
       setOpenModal(true);
     }
-  }, [deletingTenant]);
+  }, [deletingCategory]);
 
   useEffect(() => {
     return () => {
@@ -218,18 +257,20 @@ const TenantsPage = () => {
       >
         <Flex justify="space-between">
           <Breadcrumb items={breadcrumb} separator={<RightOutlined />} />
-          {(isFetching || isLoading) && <Spin />}
+          {(isFetching || isLoading) && (
+            <Spin indicator={<LoadingOutlined />} />
+          )}
         </Flex>
         <Form form={filterForm} onFieldsChange={onFilterChange}>
-          <TenantsFilter>
+          <CategoriesFilter>
             <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setOpenDrawer(true)}
             >
-              Create Restaurant
+              Create Category
             </Button>
-          </TenantsFilter>
+          </CategoriesFilter>
         </Form>
 
         <Table
@@ -238,18 +279,20 @@ const TenantsPage = () => {
             {
               title: "Actions",
               align: "center",
-              render: (_: string, record: Tenant) => {
+              render: (_: string, record: Category) => {
                 return (
-                  <Space>
+                  <Space size={2}>
                     <Button
                       type="link"
-                      onClick={() => setEditingTenant(record)}
                       icon={<EditOutlined />}
+                      size="large"
+                      onClick={() => setEditingCategory(record)}
                     />
                     <Button
                       type="link"
+                      size="large"
                       icon={<DeleteOutlined />}
-                      onClick={() => setDeletingTenant(record)}
+                      onClick={() => setDeletingCategory(record)}
                     />
                   </Space>
                 );
@@ -258,7 +301,7 @@ const TenantsPage = () => {
           ]}
           dataSource={data?.data}
           loading={isLoading}
-          rowKey={"id"}
+          rowKey={"_id"}
           pagination={{
             total: data?.total,
             pageSize: queryParams.perPage,
@@ -281,13 +324,13 @@ const TenantsPage = () => {
         />
       </Space>
       <Drawer
-        title={editingTenant ? "Update Restaurant" : "Create Restaurant"}
+        title={editingCategory ? "Editing Category" : "Create Category"}
         width={720}
         destroyOnHidden={true}
         onClose={() => {
           form.resetFields();
           setOpenDrawer(false);
-          setEditingTenant(null);
+          setEditingCategory(null);
         }}
         styles={{
           body: {
@@ -301,7 +344,7 @@ const TenantsPage = () => {
               onClick={() => {
                 form.resetFields();
                 setOpenDrawer(false);
-                setEditingTenant(null);
+                setEditingCategory(null);
               }}
             >
               Cancel
@@ -317,26 +360,26 @@ const TenantsPage = () => {
         }
       >
         <Form layout="vertical" form={form}>
-          <TenantForm />
+          <CategoryForm />
         </Form>
       </Drawer>
       <Modal
-        title={"Deleting Restaurant"}
+        title={"Deleting Category"}
         open={openModal}
         onOk={onHandleDelete}
         confirmLoading={isDeletePending}
         onCancel={() => {
-          setDeletingTenant(null);
+          setDeletingCategory(null);
           setOpenModal(false);
         }}
         okText={"Delete"}
       >
         <Typography.Paragraph>
-          Do you want to delete the Restaurant
+          Do you want to delete the category
         </Typography.Paragraph>
       </Modal>
     </>
   );
 };
 
-export default TenantsPage;
+export default CategoriesPage;
