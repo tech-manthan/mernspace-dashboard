@@ -46,7 +46,7 @@ export const ToppingsFilter = ({ children }: ToppingsFilterProps) => {
 
   return (
     <Card>
-      <Row justify={"space-between"} align={"top"} gutter={10}>
+      <Row justify={"space-between"} align={"top"} gutter={[16, 16]}>
         <Col span={24} lg={20}>
           <Row gutter={20} align={"top"}>
             <Col span={24} sm={12} lg={8}>

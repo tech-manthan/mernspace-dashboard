@@ -46,7 +46,7 @@ export const ProductsFilter = ({ children }: ProductsFilterProps) => {
 
   return (
     <Card>
-      <Row justify={"space-between"} align={"top"} gutter={[10, 10]}>
+      <Row justify={"space-between"} align={"top"} gutter={[16, 16]}>
         <Col span={24} lg={20}>
           <Row gutter={20} align={"top"}>
             <Col span={24} sm={12} lg={8}>
@@ -85,7 +85,7 @@ export const ProductsFilter = ({ children }: ProductsFilterProps) => {
                 </Form.Item>
               </Col>
             )}
-            <Col span={24} sm={12} lg={6}>
+            <Col span={24} sm={12} lg={8}>
               <Form.Item name={"categoryId"} style={{ marginBottom: 16 }}>
                 <Select
                   id="productFilterCategories"
@@ -114,7 +114,7 @@ export const ProductsFilter = ({ children }: ProductsFilterProps) => {
                 />
               </Form.Item>
             </Col>
-            <Col span={24} sm={12} lg={4}>
+            <Col span={24} sm={12} lg={6}>
               <Form.Item name={"isPublish"} style={{ marginBottom: 0 }}>
                 <Select
                   options={[
