@@ -11,8 +11,27 @@ const Attributes = ({ selectedCategoryId }: AttributesProps) => {
   const form = Form.useFormInstance();
 
   useEffect(() => {
-    form.setFieldValue("attributes", {});
-  }, [form, selectedCategoryId]);
+    if (fetchedCategory) {
+      form.resetFields(["attributes"]);
+
+      const newAttributes: Record<string, unknown> = {};
+      fetchedCategory.attributes.forEach((attr) => {
+        newAttributes[attr.name] = attr.defaultValue ?? null;
+      });
+
+      form.setFieldsValue({
+        attributes: newAttributes,
+      });
+    } else {
+      form.resetFields(["attributes"]);
+    }
+  }, [selectedCategoryId, fetchedCategory, form]);
+
+  useEffect(() => {
+    return () => {
+      form.setFieldsValue({ attributes: {} });
+    };
+  }, [form]);
 
   if (!fetchedCategory) return null;
 
