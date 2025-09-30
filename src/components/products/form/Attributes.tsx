@@ -1,5 +1,6 @@
 import { Card, Col, Form, Radio, Row, Switch, Typography } from "antd";
 import { useGetCategory } from "../../../hooks/api/useGetCategory";
+import { useEffect } from "react";
 
 type AttributesProps = {
   selectedCategoryId: string;
@@ -7,6 +8,11 @@ type AttributesProps = {
 
 const Attributes = ({ selectedCategoryId }: AttributesProps) => {
   const { data: fetchedCategory } = useGetCategory(selectedCategoryId, true);
+  const form = Form.useFormInstance();
+
+  useEffect(() => {
+    form.setFieldValue("attributes", {});
+  }, [form, selectedCategoryId]);
 
   if (!fetchedCategory) return null;
 
